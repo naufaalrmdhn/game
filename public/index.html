@@ -4,27 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="levelSelection">
-        <h1>Select Level</h1>
-        <button onclick="startGame('easy')">Easy</button>
-        <button onclick="startGame('normal')">Normal</button>
-        <button onclick="startGame('hard')">Hard</button>
+    <h1>Memory Game</h1>
+    <div id="user-info">
+        <p id="stamina">Stamina: 0</p>
+        <p id="points">Points: 0</p>
     </div>
-
-    <div id="gameContainer" class="hidden">
-        <div id="gameBoard"></div>
+    <div id="level-selection" style="display: none;">
+        <button id="easy">Easy</button>
+        <button id="normal">Normal</button>
+        <button id="hard">Hard</button>
     </div>
-
-    <div id="result" class="hidden">
-        <p id="resultMessage"></p>
-        <button id="playAgainButton">Play Again</button>
+    <div id="game-board" style="display: none;">
+        <!-- Game board will be generated here -->
     </div>
-
-    <div id="stamina">Stamina: <span id="staminaValue">0</span></div>
-
     <script src="script.js"></script>
 </body>
 </html>

@@ -3,36 +3,28 @@ body {
     text-align: center;
 }
 
-.hidden {
-    display: none;
+#user-info {
+    margin-bottom: 20px;
 }
 
-#gameBoard {
-    display: grid;
-    gap: 5px;
+#game-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
 }
 
 .card {
     width: 100px;
-    height: 150px;
-    background-color: #ccc;
+    height: 100px;
+    background-color: grey;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 24px;
-    color: #fff;
 }
 
-.card.flipped {
-    background-color: #fff;
-    color: #000;
-}
-
-.card.matched {
-    background-color: #4caf50;
-}
-
-#result {
-    margin-top: 20px;
+.card img {
+    max-width: 100%;
+    max-height: 100%;
 }

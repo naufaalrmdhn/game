@@ -1,149 +1,74 @@
+const userId = 1; // Simulasi user ID, ganti dengan ID pengguna yang sebenarnya
+
+const fetchUserData = async () => {
+    try {
+        const response = await fetch(`http://localhost:3000/user/${userId}`);
+        const data = await response.json();
+        document.getElementById('stamina').textContent = `Stamina: ${data.stamina}`;
+        document.getElementById('points').textContent = `Points: ${data.points}`;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+    }
+};
+
+const updateUserData = async (level, won) => {
+    try {
+        await fetch('http://localhost:3000/updateUser', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, stamina: user.stamina, points: user.points }),
+        });
+    } catch (error) {
+        console.error('Error updating user data:', error);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    const gameContainer = document.getElementById('gameContainer');
-    const gameBoard = document.getElementById('gameBoard');
-    const levelSelection = document.getElementById('levelSelection');
-    const result = document.getElementById('result');
-    const resultMessage = document.getElementById('resultMessage');
-    const playAgainButton = document.getElementById('playAgainButton');
-    const staminaValue = document.getElementById('staminaValue');
+    fetchUserData();
 
-    let boardSize = { rows: 2, cols: 3 };
-    let cards = [];
-    let flippedCards = [];
-    let selectedLevel = '';
-    let userStamina = 10;  // Initialize with default stamina
+    document.getElementById('easy').addEventListener('click', () => {
+        startGame('easy');
+    });
 
-    async function fetchStamina() {
-        try {
-            const response = await fetch('/stamina');
-            const data = await response.json();
-            userStamina = data.stamina;
-            staminaValue.textContent = userStamina;
-        } catch (error) {
-            console.error('Error fetching stamina:', error);
-        }
-    }
+    document.getElementById('normal').addEventListener('click', () => {
+        startGame('normal');
+    });
 
-    async function updateStamina(amount) {
-        try {
-            await fetch('/update-stamina', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount })
-            });
-            fetchStamina();
-        } catch (error) {
-            console.error('Error updating stamina:', error);
-        }
-    }
-
-    function getLevelConfig(level) {
-        switch (level) {
-            case 'easy':
-                boardSize = { rows: 2, cols: 3 };
-                break;
-            case 'normal':
-                boardSize = { rows: 2, cols: 4 };
-                break;
-            case 'hard':
-                boardSize = { rows: 3, cols: 4 };
-                break;
-        }
-        createBoard();
-    }
-
-    function createBoard() {
-        gameBoard.innerHTML = '';
-        cards = [];
-        flippedCards = [];
-        
-        for (let i = 0; i < boardSize.rows * boardSize.cols; i++) {
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.dataset.id = i;
-            card.addEventListener('click', () => flipCard(card));
-            gameBoard.appendChild(card);
-            cards.push(card);
-        }
-        gameContainer.classList.remove('hidden');
-        levelSelection.classList.add('hidden');
-    }
-
-    function flipCard(card) {
-        if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
-            card.classList.add('flipped');
-            flippedCards.push(card);
-
-            if (flippedCards.length === 2) {
-                checkMatch();
-            }
-        }
-    }
-
-    function checkMatch() {
-        const [firstCard, secondCard] = flippedCards;
-        if (firstCard.dataset.id === secondCard.dataset.id) {
-            setTimeout(() => {
-                flippedCards.forEach(card => card.classList.add('matched'));
-                flippedCards = [];
-                checkWin();
-            }, 500);
-        } else {
-            setTimeout(() => {
-                flippedCards.forEach(card => card.classList.remove('flipped'));
-                flippedCards = [];
-            }, 1000);
-        }
-    }
-
-    function checkWin() {
-        if (document.querySelectorAll('.card:not(.flipped)').length === 0) {
-            endGame(true);
-        }
-    }
-
-    function endGame(won) {
-        result.classList.remove('hidden');
-        resultMessage.textContent = won ? 'You won!' : 'You lost!';
-        playAgainButton.onclick = () => {
-            result.classList.add('hidden');
-            gameContainer.classList.add('hidden');
-            levelSelection.classList.remove('hidden');
-            if (won) {
-                const points = getPointsBasedOnLevel(selectedLevel);
-                updateStamina(points); // Increase stamina as points
-            }
-        };
-    }
-
-    function getPointsBasedOnLevel(level) {
-        switch (level) {
-            case 'easy':
-                return 100;
-            case 'normal':
-                return 300;
-            case 'hard':
-                return 500;
-        }
-    }
-
-    async function startGame(level) {
-        selectedLevel = level;
-        await updateStamina(-getLevelCost(level)); // Deduct stamina
-        getLevelConfig(level);
-    }
-
-    function getLevelCost(level) {
-        switch(level) {
-            case 'easy':
-                return 1;
-            case 'normal':
-                return 3;
-            case 'hard':
-                return 5;
-        }
-    }
-
-    // Initial call to ensure stamina is displayed
-    fetchStamina();
+    document.getElementById('hard').addEventListener('click', () => {
+        startGame('hard');
+    });
 });
+
+const startGame = async (level) => {
+    document.getElementById('level-selection').style.display = 'none';
+    document.getElementById('game-board').style.display = 'block';
+
+    // Generate game board based on level
+    const size = getBoardSize(level);
+    generateBoard(size);
+
+    // Add game logic here, e.g., matching cards
+};
+
+const getBoardSize = (level) => {
+    if (level === 'easy') return { rows: 2, cols: 3 };
+    if (level === 'normal') return { rows: 2, cols: 4 };
+    if (level === 'hard') return { rows: 3, cols: 4 };
+};
+
+const generateBoard = (size) => {
+    const board = document.getElementById('game-board');
+    board.innerHTML = '';
+
+    for (let i = 0; i < size.rows * size.cols; i++) {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.cardId = i;
+        card.innerText = '🔲'; // Placeholder, replace with actual image later
+        board.appendChild(card);
+
+        card.addEventListener('click', () => {
+            // Handle card click
+        });
+    }
+};

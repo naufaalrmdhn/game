@@ -1,72 +1,68 @@
-import fetch from 'node-fetch';
-import { Telegraf } from 'telegraf';
+const { Telegraf } = require('telegraf');
+const fetch = require('node-fetch');
 
-const bot = new Telegraf('7212012237:AAF7HqHhvQUuqLznbDKGcLyRjvM6TnbYS_w');  // Ganti dengan token bot Anda
+const bot = new Telegraf('7212012237:AAF7HqHhvQUuqLznbDKGcLyRjvM6TnbYS_w');
 
-const STAMINA_API_URL = 'http://localhost:3000/stamina';  // URL backend untuk stamina
-const UPDATE_STAMINA_API_URL = 'http://localhost:3000/update-stamina';  // URL backend untuk update stamina
-const GAME_FRONTEND_URL = 'https://naufallll.vercel.app';  // URL frontend Anda di Vercel
+const updateUser = async (userId, level, won) => {
+    let user = { stamina: 10, points: 0 };
+
+    // Fetch current user data
+    const response = await fetch(`http://localhost:3000/user/${userId}`);
+    user = await response.json();
+
+    // Deduct stamina
+    const staminaCost = { easy: 1, normal: 3, hard: 5 };
+    user.stamina -= staminaCost[level];
+
+    if (user.stamina < 0) {
+        user.stamina = 0;
+        return;
+    }
+
+    // Update points
+    const pointsReward = { easy: 100, normal: 300, hard: 500 };
+    if (won) {
+        user.points += pointsReward[level];
+    }
+
+    // Update the user data on the backend
+    await fetch('http://localhost:3000/updateUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, stamina: user.stamina, points: user.points }),
+    });
+};
 
 bot.command('start', (ctx) => {
-    ctx.reply('Welcome to the Memory Game! Type /play to start playing.');
+    ctx.reply('Welcome to the Memory Game! Click Play to start.', {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: 'Play', callback_data: 'play' }],
+            ],
+        },
+    });
 });
 
-bot.command('play', async (ctx) => {
+bot.action('play', (ctx) => {
+    ctx.reply('Choose your level:', {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: 'Easy', callback_data: 'level_easy' }],
+                [{ text: 'Normal', callback_data: 'level_normal' }],
+                [{ text: 'Hard', callback_data: 'level_hard' }],
+            ],
+        },
+    });
+});
+
+bot.action(/level_(easy|normal|hard)/, async (ctx) => {
+    const level = ctx.match[1];
     const userId = ctx.from.id;
 
-    try {
-        const response = await fetch(`${STAMINA_API_URL}?userId=${userId}`);
-        const data = await response.json();
+    // Update user data
+    await updateUser(userId, level, false); // false means the user has not won yet
 
-        if (data.stamina > 0) {
-            ctx.reply('Game started! Please choose your level: easy, normal, or hard.');
-        } else {
-            ctx.reply('You do not have enough stamina to play. Please wait a while before trying again.');
-        }
-    } catch (error) {
-        console.error('Error fetching stamina:', error);
-        ctx.reply('There was an error fetching your stamina. Please try again later.');
-    }
+    ctx.reply(`You selected ${level.charAt(0).toUpperCase() + level.slice(1)} level. Enjoy the game!`);
 });
-
-bot.hears(/^(easy|normal|hard)$/, async (ctx) => {
-    const userId = ctx.from.id;
-    const level = ctx.match[0];
-
-    try {
-        const response = await fetch(`${STAMINA_API_URL}?userId=${userId}`);
-        const data = await response.json();
-        const currentStamina = data.stamina;
-
-        const staminaCost = getLevelCost(level);
-        if (currentStamina >= staminaCost) {
-            await fetch(UPDATE_STAMINA_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, amount: -staminaCost })
-            });
-
-            ctx.reply(`You chose ${level} level. Start the game here: <a href="${GAME_FRONTEND_URL}">Play Game</a>`, { parse_mode: 'HTML' });
-        } else {
-            ctx.reply('You do not have enough stamina to play this level. Please wait or try another level.');
-        }
-    } catch (error) {
-        console.error('Error handling level selection:', error);
-        ctx.reply('There was an error starting the game. Please try again later.');
-    }
-});
-
-function getLevelCost(level) {
-    switch (level) {
-        case 'easy':
-            return 1;
-        case 'normal':
-            return 3;
-        case 'hard':
-            return 5;
-        default:
-            return 0;
-    }
-}
 
 bot.launch();
