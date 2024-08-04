@@ -2,6 +2,7 @@ const { Telegraf } = require('telegraf');
 const fetch = require('node-fetch');
 
 const bot = new Telegraf('7212012237:AAF7HqHhvQUuqLznbDKGcLyRjvM6TnbYS_w');
+const FRONTEND_URL = 'https://naufallll.vercel.app/'; // URL frontend yang di-host di Vercel
 
 const updateUser = async (userId, level, won) => {
     let user = { stamina: 10, points: 0 };
@@ -62,7 +63,9 @@ bot.action(/level_(easy|normal|hard)/, async (ctx) => {
     // Update user data
     await updateUser(userId, level, false); // false means the user has not won yet
 
-    ctx.reply(`You selected ${level.charAt(0).toUpperCase() + level.slice(1)} level. Enjoy the game!`);
+    // Send link to the game with level as a parameter
+    const gameUrl = `${FRONTEND_URL}?level=${level}&userId=${userId}`;
+    ctx.reply(`You selected ${level.charAt(0).toUpperCase() + level.slice(1)} level. Click the link below to start the game:\n${gameUrl}`);
 });
 
 bot.launch();
