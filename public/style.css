@@ -12,6 +12,13 @@ body {
     text-align: center;
 }
 
+button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
 .game-row {
     display: flex;
     justify-content: center;
@@ -40,11 +47,4 @@ body {
 .game-cell.matched {
     background-color: #a8d5e2;
     color: #000;
-}
-
-#restart-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
 }
