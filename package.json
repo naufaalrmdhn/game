@@ -1,0 +1,12 @@
+{
+  "name": "memory-game",
+  "version": "1.0.0",
+  "description": "Memory Game Web App and Telegram Bot",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "grammy": "^1.4.0"  
+  }
+}
