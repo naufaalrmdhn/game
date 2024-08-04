@@ -1,19 +1,8 @@
 const board = document.getElementById('board');
 const startButton = document.getElementById('start-button');
-const loadingScreen = document.getElementById('loading');
-const gameContainer = document.getElementById('game-container');
-
-// Menampilkan loading screen dan menyembunyikannya setelah 1 detik
-window.onload = () => {
-    setTimeout(() => {
-        loadingScreen.classList.add('hidden');
-        gameContainer.classList.remove('hidden');
-    }, 1000); // Ubah durasi sesuai kebutuhan
-};
 
 // Fungsi untuk memulai permainan
 const startGame = () => {
-    gameContainer.classList.remove('hidden');
     startButton.classList.add('hidden');
     createBoard();
 };
