@@ -49,7 +49,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to create the game board
     function createBoard() {
         board.innerHTML = '';
+        let gridTemplateColumns;
+        let gridTemplateRows;
         const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
+
+        switch (selectedLevel) {
+            case 'easy':
+                gridTemplateColumns = 'repeat(3, 100px)'; // 3 columns
+                gridTemplateRows = 'repeat(3, 100px)';    // 3 rows
+                break;
+            case 'normal':
+                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
+                gridTemplateRows = 'repeat(2, 100px)';    // 2 rows
+                break;
+            case 'hard':
+                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
+                gridTemplateRows = 'repeat(3, 100px)';    // 3 rows
+                break;
+            default:
+                gridTemplateColumns = 'repeat(3, 100px)'; // Default fallback
+                gridTemplateRows = 'repeat(3, 100px)';
+        }
+
+        board.style.gridTemplateColumns = gridTemplateColumns;
+        board.style.gridTemplateRows = gridTemplateRows;
 
         cards.forEach((image) => {
             const card = document.createElement('div');
