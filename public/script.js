@@ -1,138 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     const levelSelection = document.getElementById('level-selection');
+    const gameContainer = document.getElementById('game-container');
     const gameBoard = document.getElementById('game-board');
+    const staminaDisplay = document.getElementById('stamina-display');
     const result = document.getElementById('result');
     const resultMessage = document.getElementById('result-message');
     const playAgainButton = document.getElementById('play-again');
-    const staminaDisplay = document.getElementById('stamina-display');
-
-    let selectedLevel = '';
-    let stamina = 10; // Initial stamina
-    let images = []; // To store images for the game
-    let selectedCards = [];
-    let matchedPairs = 0;
-
-    function loadImages(level) {
-        images = [];
-        const levelDir = level === 'easy' ? 'easy' : level === 'normal' ? 'normal' : 'hard';
-        const totalImages = level === 'easy' ? 3 : level === 'normal' ? 6 : 12;
-
-        for (let i = 1; i <= totalImages; i++) {
-            images.push(`images/${levelDir}/card${i}.png`);
-        }
-    }
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    function generateGameBoard(level) {
-        let rows, cols;
-        let imageCount;
-
-        if (level === 'easy') {
-            rows = 2;
-            cols = 3;
-            imageCount = 3;
-        } else if (level === 'normal') {
-            rows = 2;
-            cols = 4;
-            imageCount = 6;
-        } else if (level === 'hard') {
-            rows = 3;
-            cols = 4;
-            imageCount = 12;
-        }
-
-        loadImages(level);
-        images = shuffleArray([...images, ...images]); // Duplicate images for matching pairs
-
-        gameBoard.innerHTML = '';
-        gameBoard.style.gridTemplateColumns = `repeat(${cols}, 100px)`;
-        gameBoard.style.gridTemplateRows = `repeat(${rows}, 100px)`;
-
-        for (let i = 0; i < rows * cols; i++) {
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.style.width = '100px';
-            card.style.height = '100px';
-            card.style.backgroundImage = `url('images/hidden.png')`; // Placeholder image
-            card.style.backgroundSize = 'cover';
-            card.dataset.image = images[i];
-            card.dataset.index = i;
-            card.addEventListener('click', () => {
-                flipCard(card);
-            });
-            gameBoard.appendChild(card);
-        }
-        gameBoard.classList.remove('hidden');
-    }
-
-    function flipCard(card) {
-        if (selectedCards.length < 2 && !card.classList.contains('flipped')) {
-            card.style.backgroundImage = `url('${card.dataset.image}')`;
-            card.classList.add('flipped');
-            selectedCards.push(card);
-
-            if (selectedCards.length === 2) {
-                setTimeout(checkMatch, 1000);
-            }
-        }
-    }
-
-    function checkMatch() {
-        const [card1, card2] = selectedCards;
-        if (card1.dataset.image === card2.dataset.image) {
-            card1.removeEventListener('click', () => flipCard(card1));
-            card2.removeEventListener('click', () => flipCard(card2));
-            matchedPairs++;
-            if (matchedPairs === images.length / 2) {
-                endGame(true);
-            }
-        } else {
-            card1.style.backgroundImage = `url('images/hidden.png')`;
-            card2.style.backgroundImage = `url('images/hidden.png')`;
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
-        }
-        selectedCards = [];
-    }
-
-    function handleLevelSelection(level) {
-        selectedLevel = level;
-        levelSelection.classList.add('hidden');
-        generateGameBoard(level);
-    }
-
-    function endGame(win) {
-        result.classList.remove('hidden');
-        resultMessage.textContent = win ? 'You Win!' : 'You Lose!';
-        stamina += win ? getLevelStaminaCost(selectedLevel) : -getLevelStaminaCost(selectedLevel);
-        updateStamina();
-    }
-
-    function getLevelStaminaCost(level) {
-        return level === 'easy' ? 1 : level === 'normal' ? 3 : 5;
-    }
-
-    document.getElementById('easy').addEventListener('click', () => handleLevelSelection('easy'));
-    document.getElementById('normal').addEventListener('click', () => handleLevelSelection('normal'));
-    document.getElementById('hard').addEventListener('click', () => handleLevelSelection('hard'));
-
-    playAgainButton.addEventListener('click', () => {
-        result.classList.add('hidden');
-        levelSelection.classList.remove('hidden');
-        stamina = 10; // Reset stamina or fetch from server
-        updateStamina();
-    });
-
+    let stamina = 10;
+    let selectedLevel;
+    let boardSize;
+    let cards = [];
+    let flippedCards = [];
+    
     async function updateStamina() {
         try {
-            const response = await fetch('/stamina');
+            const response = await fetch('/stamina?userId=1'); // Use your user ID
             const data = await response.json();
             stamina = data.stamina;
             staminaDisplay.textContent = `Stamina: ${stamina}`;
@@ -141,5 +23,136 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    updateStamina();
-});
+    async function decreaseStamina(cost) {
+        if (stamina >= cost) {
+            try {
+                const response = await fetch('/stamina/decrease', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 1, cost }),
+                });
+                const data = await response.json();
+                stamina = data.stamina;
+                staminaDisplay.textContent = `Stamina: ${stamina}`;
+            } catch (error) {
+                console.error('Error decreasing stamina:', error);
+            }
+        } else {
+            alert('Not enough stamina!');
+        }
+    }
+
+    async function increaseStamina() {
+        try {
+            const response = await fetch('/stamina/increase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: 1 }),
+            });
+            const data = await response.json();
+            stamina = data.stamina;
+            staminaDisplay.textContent = `Stamina: ${stamina}`;
+        } catch (error) {
+            console.error('Error increasing stamina:', error);
+        }
+    }
+
+    function getLevelConfig(level) {
+        switch(level) {
+            case 'easy':
+                case 'easy':
+                    boardSize = { rows: 2, cols: 3 };
+                    break;
+                case 'normal':
+                    boardSize = { rows: 2, cols: 4 };
+                    break;
+                case 'hard':
+                    boardSize = { rows: 3, cols: 4 };
+                    break;
+            }
+            createBoard();
+        }
+    
+        function createBoard() {
+            gameBoard.innerHTML = '';
+            cards = [];
+            flippedCards = [];
+            
+            for (let i = 0; i < boardSize.rows * boardSize.cols; i++) {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.id = i;
+                card.addEventListener('click', () => flipCard(card));
+                gameBoard.appendChild(card);
+                cards.push(card);
+            }
+            gameContainer.classList.remove('hidden');
+            levelSelection.classList.add('hidden');
+        }
+    
+        function flipCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+                card.classList.add('flipped');
+                flippedCards.push(card);
+    
+                if (flippedCards.length === 2) {
+                    checkMatch();
+                }
+            }
+        }
+    
+        function checkMatch() {
+            const [firstCard, secondCard] = flippedCards;
+            if (firstCard.dataset.id === secondCard.dataset.id) {
+                setTimeout(() => {
+                    flippedCards.forEach(card => card.classList.add('matched'));
+                    flippedCards = [];
+                    checkWin();
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    flippedCards.forEach(card => card.classList.remove('flipped'));
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+    
+        function checkWin() {
+            if (document.querySelectorAll('.card:not(.flipped)').length === 0) {
+                endGame(true);
+            }
+        }
+    
+        function endGame(won) {
+            result.classList.remove('hidden');
+            resultMessage.textContent = won ? 'You won!' : 'You lost!';
+            playAgainButton.onclick = () => {
+                result.classList.add('hidden');
+                gameContainer.classList.add('hidden');
+                levelSelection.classList.remove('hidden');
+                // Optional: Add points to user here based on level
+            };
+        }
+    
+        async function startGame(level) {
+            selectedLevel = level;
+            await updateStamina();
+            await decreaseStamina(getLevelCost(level));
+            getLevelConfig(level);
+        }
+    
+        function getLevelCost(level) {
+            switch(level) {
+                case 'easy':
+                    return 1;
+                case 'normal':
+                    return 3;
+                case 'hard':
+                    return 5;
+            }
+        }
+    
+        // Initial call to ensure stamina is displayed
+        updateStamina();
+    });
+    

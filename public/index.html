@@ -9,16 +9,18 @@
 <body>
     <div id="level-selection">
         <h1>Select Level</h1>
-        <button id="easy">Easy</button>
-        <button id="normal">Normal</button>
-        <button id="hard">Hard</button>
+        <button onclick="startGame('easy')">Easy</button>
+        <button onclick="startGame('normal')">Normal</button>
+        <button onclick="startGame('hard')">Hard</button>
     </div>
-    <div id="game-board" class="hidden"></div>
-    <div id="result" class="hidden">
-        <h2 id="result-message"></h2>
-        <button id="play-again">Play Again</button>
+    <div id="game-container" class="hidden">
+        <div id="stamina-display">Stamina: 10</div>
+        <div id="game-board"></div>
+        <div id="result" class="hidden">
+            <p id="result-message"></p>
+            <button id="play-again">Play Again</button>
+        </div>
     </div>
-    <div id="stamina-display"></div>
     <script src="script.js"></script>
 </body>
 </html>
