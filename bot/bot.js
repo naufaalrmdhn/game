@@ -70,7 +70,7 @@ bot.on('callback_query', async (ctx) => {
         body: JSON.stringify({ userId })
     });
 
-    const gameUrl = `https://naufallll.vercel.app/game.html?level=${level}`;
+    const gameUrl = `https://naufallll.vercel.app/index.html?level=${level}`;
     ctx.reply(`Starting ${level} game... [Click here to play](${gameUrl})`, { parse_mode: 'Markdown' });
 });
 
