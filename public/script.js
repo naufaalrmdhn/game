@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedLevel = '';
     let stamina = 10; // Initial stamina
     let images = []; // To store images for the game
+    let selectedCards = [];
+    let matchedPairs = 0;
 
     function loadImages(level) {
         images = [];
@@ -61,20 +63,60 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.backgroundImage = `url('images/hidden.png')`; // Placeholder image
             card.style.backgroundSize = 'cover';
             card.dataset.image = images[i];
+            card.dataset.index = i;
             card.addEventListener('click', () => {
-                // Add game logic here
-                console.log('Card clicked!');
-                // Example: card.style.backgroundImage = `url('${card.dataset.image}')`;
+                flipCard(card);
             });
             gameBoard.appendChild(card);
         }
         gameBoard.classList.remove('hidden');
     }
 
+    function flipCard(card) {
+        if (selectedCards.length < 2 && !card.classList.contains('flipped')) {
+            card.style.backgroundImage = `url('${card.dataset.image}')`;
+            card.classList.add('flipped');
+            selectedCards.push(card);
+
+            if (selectedCards.length === 2) {
+                setTimeout(checkMatch, 1000);
+            }
+        }
+    }
+
+    function checkMatch() {
+        const [card1, card2] = selectedCards;
+        if (card1.dataset.image === card2.dataset.image) {
+            card1.removeEventListener('click', () => flipCard(card1));
+            card2.removeEventListener('click', () => flipCard(card2));
+            matchedPairs++;
+            if (matchedPairs === images.length / 2) {
+                endGame(true);
+            }
+        } else {
+            card1.style.backgroundImage = `url('images/hidden.png')`;
+            card2.style.backgroundImage = `url('images/hidden.png')`;
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+        }
+        selectedCards = [];
+    }
+
     function handleLevelSelection(level) {
         selectedLevel = level;
         levelSelection.classList.add('hidden');
         generateGameBoard(level);
+    }
+
+    function endGame(win) {
+        result.classList.remove('hidden');
+        resultMessage.textContent = win ? 'You Win!' : 'You Lose!';
+        stamina += win ? getLevelStaminaCost(selectedLevel) : -getLevelStaminaCost(selectedLevel);
+        updateStamina();
+    }
+
+    function getLevelStaminaCost(level) {
+        return level === 'easy' ? 1 : level === 'normal' ? 3 : 5;
     }
 
     document.getElementById('easy').addEventListener('click', () => handleLevelSelection('easy'));

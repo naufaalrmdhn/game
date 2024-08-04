@@ -1,38 +1,45 @@
 body {
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    text-align: center;
     margin: 0;
-    background-color: #f0f0f0;
+    padding: 0;
 }
 
-#game-container {
-    text-align: center;
+#level-selection {
+    margin-top: 20px;
 }
 
 button {
     font-size: 16px;
     padding: 10px 20px;
-    margin: 5px;
+    margin: 10px;
     cursor: pointer;
 }
 
 #game-board {
     display: grid;
     gap: 5px;
-    margin-top: 20px;
+    margin: 20px auto;
+    max-width: 80%;
 }
 
-#game-board.hidden {
-    display: none;
+.card {
+    background-color: #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
 }
 
-#result {
-    margin-top: 20px;
+.card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
-#result.hidden {
+.hidden {
     display: none;
 }
