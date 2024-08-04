@@ -3,15 +3,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('game-board');
     const board = document.getElementById('board');
     const staminaValue = document.getElementById('stamina-value');
-    
+    const userId = 'your-telegram-user-id'; // Anda perlu mendapatkan ID pengguna dari bot Telegram
+
     async function fetchStamina() {
-        const response = await fetch('http://localhost:3000/stamina');
+        const response = await fetch(`http://localhost:3000/stamina?userId=${userId}`);
         const data = await response.json();
         staminaValue.textContent = data.stamina;
         return data.stamina;
     }
 
-    function updateStamina(stamina) {
+    async function updateStamina(staminaCost) {
+        const response = await fetch('http://localhost:3000/update-stamina', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, staminaCost })
+        });
+        const data = await response.json();
+        updateStaminaDisplay(data.stamina);
+    }
+
+    function updateStaminaDisplay(stamina) {
         staminaValue.textContent = stamina;
     }
 
@@ -20,24 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const level = button.id;
             const stamina = await fetchStamina();
 
-            if ((level === 'easy' && stamina < 1) || (level === 'normal' && stamina < 3) || (level === 'hard' && stamina < 5)) {
-                alert('Sorry, you do not have enough stamina to play this level.');
-                return;
-            }
-
-            // Deduct stamina based on the level
             let staminaCost = 1;
             if (level === 'normal') staminaCost = 3;
             if (level === 'hard') staminaCost = 5;
 
-            await fetch('http://localhost:3000/update-stamina', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ staminaCost })
-            });
+            if (stamina < staminaCost) {
+                alert('Sorry, you do not have enough stamina to play this level.');
+                return;
+            }
 
-            const newStamina = stamina - staminaCost;
-            updateStamina(newStamina);
+            await updateStamina(staminaCost);
             startGame(level);
         });
     });
