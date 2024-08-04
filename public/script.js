@@ -1,27 +1,69 @@
-const board = document.getElementById('board');
-const startButton = document.getElementById('start-button');
+document.addEventListener('DOMContentLoaded', () => {
+    const cardImages = [
+        'images/easy/card1.png',
+        'images/easy/card2.png',
+        'images/easy/card3.png'
+    ];
 
-// Fungsi untuk memulai permainan
-const startGame = () => {
-    startButton.classList.add('hidden');
-    createBoard();
-};
+    const board = document.getElementById('game-board');
+    const startButton = document.getElementById('start-button');
+    let cardElements = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
 
-// Menambahkan event listener ke tombol start
-startButton.addEventListener('click', startGame);
+    // Function to create the game board
+    function createBoard() {
+        board.innerHTML = '';
+        const cards = [...cardImages, ...cardImages].sort(() => 0.5 - Math.random());
 
-// Fungsi untuk membuat papan permainan
-const createBoard = () => {
-    const cardValues = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E', 'F', 'F'];
-    const shuffledValues = cardValues.sort(() => Math.random() - 0.5);
+        cards.forEach((image, index) => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.image = image;
 
-    shuffledValues.forEach(value => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.cardValue = value;
-        card.addEventListener('click', () => {
-            // Logika untuk membuka dan mencocokkan kartu
+            const img = document.createElement('img');
+            img.src = image;
+            card.appendChild(img);
+
+            card.addEventListener('click', () => flipCard(card));
+            board.appendChild(card);
+            cardElements.push(card);
         });
-        board.appendChild(card);
+    }
+
+    // Function to flip a card
+    function flipCard(card) {
+        if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
+
+        card.classList.add('flipped');
+        flippedCards.push(card);
+
+        if (flippedCards.length === 2) {
+            setTimeout(checkForMatch, 1000);
+        }
+    }
+
+    // Function to check if two flipped cards match
+    function checkForMatch() {
+        const [card1, card2] = flippedCards;
+        const image1 = card1.dataset.image;
+        const image2 = card2.dataset.image;
+
+        if (image1 === image2) {
+            matchedPairs++;
+            if (matchedPairs === cardImages.length) {
+                alert('Congratulations! You have matched all pairs.');
+            }
+        } else {
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+        }
+
+        flippedCards = [];
+    }
+
+    // Event listener for the start button
+    startButton.addEventListener('click', () => {
+        createBoard();
     });
-};
+});
