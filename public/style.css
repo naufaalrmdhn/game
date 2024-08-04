@@ -12,14 +12,38 @@ body {
     width: fit-content;
 }
 
+/* Hide elements initially */
+.hidden {
+    display: none;
+}
+
+/* CSS for level selection */
+#level-selection {
+    margin: 20px auto;
+}
+
+.level-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s;
+}
+
+.level-button:hover {
+    background-color: #2980b9;
+}
+
 /* CSS for game board */
 .board {
     display: grid;
     gap: 10px;
     justify-content: center;
     margin: 20px auto;
-    grid-template-columns: repeat(3, 100px); /* 3 columns for Easy level */
-    grid-template-rows: repeat(2, 100px); /* 2 rows for Easy level */
 }
 
 /* CSS for cards */
@@ -51,19 +75,19 @@ body {
     transform: scale(1.05);
 }
 
-/* CSS for start button */
-#start-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: #3498db;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 20px;
-    transition: background-color 0.3s;
+/* Responsive Design */
+@media (max-width: 600px) {
+    .card {
+        width: 70px;
+        height: 70px;
+        font-size: 20px;
+    }
 }
 
-#start-button:hover {
-    background-color: #2980b9;
+@media (max-width: 400px) {
+    .card {
+        width: 60px;
+        height: 60px;
+        font-size: 16px;
+    }
 }

@@ -1,22 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const cardImages = [
-        'images/easy/card1.png',
-        'images/easy/card2.png',
-        'images/easy/card3.png'
-    ];
+    const cardImages = {
+        easy: [
+            'images/easy/card1.png',
+            'images/easy/card2.png',
+            'images/easy/card3.png'
+        ],
+        normal: [
+            'images/normal/card1.png',
+            'images/normal/card2.png',
+            'images/normal/card3.png',
+            'images/normal/card4.png'
+        ],
+        hard: [
+            'images/hard/card1.png',
+            'images/hard/card2.png',
+            'images/hard/card3.png',
+            'images/hard/card4.png',
+            'images/hard/card5.png',
+            'images/hard/card6.png'
+        ]
+    };
 
     const board = document.getElementById('game-board');
     const startButton = document.getElementById('start-button');
+    const levelSelection = document.getElementById('level-selection');
+    const levelButtons = document.querySelectorAll('.level-button');
     let cardElements = [];
     let flippedCards = [];
     let matchedPairs = 0;
+    let selectedLevel = '';
+
+    // Show level selection when start button is clicked
+    startButton.addEventListener('click', () => {
+        startButton.classList.add('hidden');
+        levelSelection.classList.remove('hidden');
+    });
+
+    // Handle level selection
+    levelButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            selectedLevel = button.dataset.level;
+            levelSelection.classList.add('hidden');
+            board.classList.remove('hidden');
+            createBoard();
+        });
+    });
 
     // Function to create the game board
     function createBoard() {
         board.innerHTML = '';
-        const cards = [...cardImages, ...cardImages].sort(() => 0.5 - Math.random());
+        const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
 
-        cards.forEach((image, index) => {
+        cards.forEach((image) => {
             const card = document.createElement('div');
             card.classList.add('card');
             card.dataset.image = image;
@@ -51,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (image1 === image2) {
             matchedPairs++;
-            if (matchedPairs === cardImages.length) {
+            if (matchedPairs === cardImages[selectedLevel].length) {
                 alert('Congratulations! You have matched all pairs.');
             }
         } else {
@@ -61,9 +96,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
         flippedCards = [];
     }
-
-    // Event listener for the start button
-    startButton.addEventListener('click', () => {
-        createBoard();
-    });
 });
