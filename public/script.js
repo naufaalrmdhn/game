@@ -3,23 +3,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('game-board');
     const board = document.getElementById('board');
     const staminaValue = document.getElementById('stamina-value');
-    const userId = 'your-telegram-user-id'; // Anda perlu mendapatkan ID pengguna dari bot Telegram
+    const userId = 'your-telegram-user-id'; // Ganti dengan ID pengguna yang valid
 
     async function fetchStamina() {
-        const response = await fetch(`http://localhost:3000/stamina?userId=${userId}`);
-        const data = await response.json();
-        staminaValue.textContent = data.stamina;
-        return data.stamina;
+        try {
+            const response = await fetch(`http://localhost:3000/stamina?userId=${userId}`);
+            const data = await response.json();
+            staminaValue.textContent = data.stamina;
+            return data.stamina;
+        } catch (error) {
+            console.error('Error fetching stamina:', error);
+        }
     }
 
     async function updateStamina(staminaCost) {
-        const response = await fetch('http://localhost:3000/update-stamina', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, staminaCost })
-        });
-        const data = await response.json();
-        updateStaminaDisplay(data.stamina);
+        try {
+            const response = await fetch('http://localhost:3000/update-stamina', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, staminaCost })
+            });
+            const data = await response.json();
+            updateStaminaDisplay(data.stamina);
+        } catch (error) {
+            console.error('Error updating stamina:', error);
+        }
     }
 
     function updateStaminaDisplay(stamina) {
