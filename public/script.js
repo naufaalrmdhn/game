@@ -1,86 +1,60 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const levelButtons = document.querySelectorAll('#level-selection button');
+    const levelSelection = document.getElementById('level-selection');
     const gameBoard = document.getElementById('game-board');
-    const board = document.getElementById('board');
-    const staminaValue = document.getElementById('stamina-value');
-    const userId = 'your-telegram-user-id'; // Ganti dengan ID pengguna yang valid
-
-    async function fetchStamina() {
-        try {
-            const response = await fetch(`http://localhost:3000/stamina?userId=${userId}`);
-            const data = await response.json();
-            staminaValue.textContent = data.stamina;
-            return data.stamina;
-        } catch (error) {
-            console.error('Error fetching stamina:', error);
+    const result = document.getElementById('result');
+    const resultMessage = document.getElementById('result-message');
+    const playAgainButton = document.getElementById('play-again');
+    
+    let selectedLevel = '';
+    let stamina = 10; // Initial stamina
+    
+    function generateGameBoard(level) {
+        let rows, cols;
+        if (level === 'easy') {
+            rows = 2;
+            cols = 3;
+        } else if (level === 'normal') {
+            rows = 2;
+            cols = 4;
+        } else if (level === 'hard') {
+            rows = 3;
+            cols = 4;
         }
-    }
 
-    async function updateStamina(staminaCost) {
-        try {
-            const response = await fetch('http://localhost:3000/update-stamina', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, staminaCost })
+        gameBoard.innerHTML = '';
+        gameBoard.style.gridTemplateColumns = `repeat(${cols}, 100px)`;
+        gameBoard.style.gridTemplateRows = `repeat(${rows}, 100px)`;
+
+        for (let i = 0; i < rows * cols; i++) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.style.backgroundColor = '#ccc';
+            card.style.width = '100px';
+            card.style.height = '100px';
+            card.style.border = '1px solid #333';
+            card.addEventListener('click', () => {
+                // Add game logic here
             });
-            const data = await response.json();
-            updateStaminaDisplay(data.stamina);
-        } catch (error) {
-            console.error('Error updating stamina:', error);
+            gameBoard.appendChild(card);
         }
+        gameBoard.classList.remove('hidden');
     }
 
-    function updateStaminaDisplay(stamina) {
-        staminaValue.textContent = stamina;
+    function handleLevelSelection(level) {
+        selectedLevel = level;
+        levelSelection.classList.add('hidden');
+        generateGameBoard(level);
     }
 
-    levelButtons.forEach(button => {
-        button.addEventListener('click', async () => {
-            const level = button.id;
-            const stamina = await fetchStamina();
+    document.getElementById('easy').addEventListener('click', () => handleLevelSelection('easy'));
+    document.getElementById('normal').addEventListener('click', () => handleLevelSelection('normal'));
+    document.getElementById('hard').addEventListener('click', () => handleLevelSelection('hard'));
 
-            let staminaCost = 1;
-            if (level === 'normal') staminaCost = 3;
-            if (level === 'hard') staminaCost = 5;
-
-            if (stamina < staminaCost) {
-                alert('Sorry, you do not have enough stamina to play this level.');
-                return;
-            }
-
-            await updateStamina(staminaCost);
-            startGame(level);
-        });
+    playAgainButton.addEventListener('click', () => {
+        result.classList.add('hidden');
+        levelSelection.classList.remove('hidden');
+        stamina = 10; // Reset stamina or fetch from server
     });
 
-    function startGame(level) {
-        gameBoard.style.display = 'block';
-        board.innerHTML = '';
-        let rows, cols;
-
-        switch (level) {
-            case 'easy':
-                rows = 2;
-                cols = 3;
-                break;
-            case 'normal':
-                rows = 2;
-                cols = 4;
-                break;
-            case 'hard':
-                rows = 3;
-                cols = 4;
-                break;
-        }
-
-        board.style.gridTemplateRows = `repeat(${rows}, 60px)`;
-        board.style.gridTemplateColumns = `repeat(${cols}, 60px)`;
-
-        const totalTiles = rows * cols;
-        for (let i = 0; i < totalTiles; i++) {
-            const tile = document.createElement('div');
-            tile.classList.add('tile');
-            board.appendChild(tile);
-        }
-    }
+    // Add function to check result and update stamina
 });

@@ -1,36 +1,38 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     margin: 0;
-    padding: 20px;
+    background-color: #f0f0f0;
 }
 
-#stamina-info {
-    margin-bottom: 20px;
+#game-container {
+    text-align: center;
 }
 
-#level-selection button {
-    margin: 5px;
-    padding: 10px 20px;
+button {
     font-size: 16px;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
 }
 
 #game-board {
+    display: grid;
+    gap: 5px;
     margin-top: 20px;
 }
 
-#board {
-    display: grid;
-    gap: 5px;
+#game-board.hidden {
+    display: none;
 }
 
-.tile {
-    background-color: #ccc;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
+#result {
+    margin-top: 20px;
+}
+
+#result.hidden {
+    display: none;
 }

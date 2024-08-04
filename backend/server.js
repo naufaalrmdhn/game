@@ -1,30 +1,32 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
 const port = 3000;
+const bodyParser = require('body-parser');
 
-app.use(express.json());
-app.use(cors());
+app.use(bodyParser.json());
 
-let users = {}; // Simulasi penyimpanan data pengguna
+let userStamina = {}; // Simulasi penyimpanan stamina
 
-// Mendapatkan stamina pengguna
 app.get('/stamina', (req, res) => {
     const userId = req.query.userId;
-    const stamina = users[userId] ? users[userId].stamina : 0;
-    res.json({ stamina });
+    if (userStamina[userId] !== undefined) {
+        res.json({ stamina: userStamina[userId] });
+    } else {
+        res.json({ stamina: 10 }); // Default stamina
+    }
 });
 
-// Memperbarui stamina pengguna
 app.post('/update-stamina', (req, res) => {
-    const { userId, staminaCost } = req.body;
-    if (!users[userId]) {
-        users[userId] = { stamina: 10 }; // Inisialisasi stamina
+    const { userId, staminaCost, won } = req.body;
+    if (!userStamina[userId]) userStamina[userId] = 10;
+    if (won) {
+        userStamina[userId] += staminaCost;
+    } else {
+        userStamina[userId] -= staminaCost;
     }
-    users[userId].stamina -= staminaCost;
-    res.json({ stamina: users[userId].stamina });
+    res.json({ stamina: userStamina[userId] });
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });
