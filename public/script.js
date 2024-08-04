@@ -1,15 +1,14 @@
-// JavaScript untuk logika permainan
 const board = document.getElementById('board');
 const startButton = document.getElementById('start-button');
 const loadingScreen = document.getElementById('loading');
 const gameContainer = document.getElementById('game-container');
 
-// Menampilkan loading screen dan menyembunyikannya setelah 2 detik
+// Menampilkan loading screen dan menyembunyikannya setelah 1 detik
 window.onload = () => {
     setTimeout(() => {
         loadingScreen.classList.add('hidden');
         gameContainer.classList.remove('hidden');
-    }, 2000); // Ubah durasi sesuai kebutuhan
+    }, 1000); // Ubah durasi sesuai kebutuhan
 };
 
 // Fungsi untuk memulai permainan
