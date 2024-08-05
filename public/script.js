@@ -25,12 +25,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const levelSelection = document.getElementById('level-selection');
     const levelButtons = document.querySelectorAll('.level-button');
-    const pointsDisplay = document.getElementById('points');
+    const usernameElement = document.getElementById('username');
+    const pointsElement = document.getElementById('points');
+    const staminaElement = document.getElementById('stamina');
     let cardElements = [];
     let flippedCards = [];
     let matchedPairs = 0;
     let selectedLevel = '';
-    const userId = new URLSearchParams(window.location.search).get('userId');
+    let userId = localStorage.getItem('userId') || 'unknown';
+    let points = 0;
+    let stamina = 10;
+    let levelPoints = { easy: 100, normal: 300, hard: 500 };
+
+    // Fetch username and update UI
+    async function fetchUsername() {
+        const response = await fetch('/get-username', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        });
+        const data = await response.json();
+        usernameElement.textContent = `Username: ${data.username || 'unknown'}`;
+    }
+
+    // Fetch and display stamina
+    async function fetchStamina() {
+        const response = await fetch('/get-stamina', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        });
+        const data = await response.json();
+        stamina = data.stamina || 10;
+        staminaElement.textContent = `Stamina: ${stamina}`;
+    }
+
+    // Update stamina in the backend
+    async function updateStamina() {
+        if (stamina < 10) {
+            stamina++;
+            staminaElement.textContent = `Stamina: ${stamina}`;
+            await fetch('/update-stamina', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, stamina: stamina })
+            });
+        }
+    }
+
+    // Update points in the backend
+    async function updatePoints() {
+        await fetch('/update-points', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, points: points })
+        });
+        pointsElement.textContent = `Points: ${points}`; // Update points UI
+    }
+
+    // Initialize the UI and fetch data
+    function initialize() {
+        fetchUsername();
+        fetchStamina();
+        setInterval(updateStamina, 60000); // Update stamina every 1 minute
+    }
+
+    function updateUI() {
+        pointsElement.textContent = `Points: ${points}`;
+        staminaElement.textContent = `Stamina: ${stamina}`;
+    }
 
     // Show level selection when start button is clicked
     startButton.addEventListener('click', () => {
@@ -70,6 +133,19 @@ document.addEventListener('DOMContentLoaded', () => {
             board.appendChild(card);
             cardElements.push(card);
         });
+
+        // Adjust grid layout based on selected level
+        switch (selectedLevel) {
+            case 'easy':
+                board.style.gridTemplateColumns = 'repeat(3, 80px)';
+                break;
+            case 'normal':
+                board.style.gridTemplateColumns = 'repeat(4, 80px)';
+                break;
+            case 'hard':
+                board.style.gridTemplateColumns = 'repeat(6, 80px)';
+                break;
+        }
     }
 
     // Function to flip a card
@@ -77,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
 
         card.classList.add('flipped');
+        card.querySelector('.cover').style.display = 'none'; // Hide cover when flipped
         flippedCards.push(card);
 
         if (flippedCards.length === 2) {
@@ -93,35 +170,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (image1 === image2) {
             matchedPairs++;
             if (matchedPairs === cardImages[selectedLevel].length) {
-                updatePoints(100);  // Increase points by 100 when all pairs are matched
+                points += levelPoints[selectedLevel];
+                updatePoints(); // Update points in backend and UI
                 alert('Congratulations! You have matched all pairs.');
+                resetGame();
             }
         } else {
             card1.classList.remove('flipped');
             card2.classList.remove('flipped');
+            card1.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
+            card2.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
         }
 
         flippedCards = [];
     }
 
-    // Function to update points on the server
-    async function updatePoints(points) {
-        await fetch('http://localhost:3000/update-points', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, points: points })
-        });
-
-        const response = await fetch('http://localhost:3000/get-points', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-        });
-
-        const data = await response.json();
-        pointsDisplay.textContent = `Points: ${data.points || 0}`;
+    // Function to reset the game
+    function resetGame() {
+        matchedPairs = 0;
+        cardElements.forEach(card => card.classList.remove('flipped'));
+        cardElements.forEach(card => card.querySelector('.cover').style.display = 'block'); // Show covers
+        cardElements = [];
+        board.innerHTML = '';
+        board.classList.add('hidden');
+        startButton.classList.remove('hidden');
     }
 
-    // Fetch initial points
-    updatePoints(0);
+    initialize(); // Initialize everything when DOM is loaded
 });
