@@ -1,4 +1,3 @@
-// bot.js
 const { Telegraf } = require('telegraf');
 const bot = new Telegraf('7212012237:AAF7HqHhvQUuqLznbDKGcLyRjvM6TnbYS_w');
 

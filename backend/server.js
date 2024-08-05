@@ -4,10 +4,10 @@ const port = 3000;
 
 app.use(express.json());
 
-const users = {};
+let users = {};
 
-app.post('/user/:id/update', (req, res) => {
-    const userId = req.params.id;
+app.post('/user/:userId/update', (req, res) => {
+    const userId = req.params.userId;
     const { points, stamina } = req.body;
 
     if (!users[userId]) {
@@ -22,7 +22,12 @@ app.post('/user/:id/update', (req, res) => {
         users[userId].stamina = stamina;
     }
 
-    res.send(users[userId]);
+    res.status(200).json(users[userId]);
+});
+
+app.get('/user/:userId', (req, res) => {
+    const userId = req.params.userId;
+    res.status(200).json(users[userId] || { points: 0, stamina: 10 });
 });
 
 app.listen(port, () => {
