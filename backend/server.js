@@ -3,23 +3,48 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-let userData = {}; // Simpan data pengguna dengan ID Telegram sebagai kunci
-
-app.post('/updateUser', (req, res) => {
-    const { userId, stamina, points } = req.body;
-    userData[userId] = { stamina, points };
-    res.status(200).send('User data updated');
-});
+let users = {
+    "exampleUserId": { stamina: 10, points: 0 }
+};
 
 app.get('/user/:userId', (req, res) => {
-    const { userId } = req.params;
-    const data = userData[userId] || { stamina: 10, points: 0 }; // Default data if user not found
-    res.json(data);
+    const userId = req.params.userId;
+    if (users[userId]) {
+        res.json(users[userId]);
+    } else {
+        users[userId] = { stamina: 10, points: 0 };
+        res.json(users[userId]);
+    }
+});
+
+app.post('/updateUser', (req, res) => {
+    const { userId, level, won } = req.body;
+    if (users[userId]) {
+        let staminaCost;
+        if (level === 'easy') staminaCost = 1;
+        if (level === 'normal') staminaCost = 3;
+        if (level === 'hard') staminaCost = 5;
+        if (users[userId].stamina >= staminaCost) {
+            users[userId].stamina -= staminaCost;
+            if (won) {
+                let pointsEarned;
+                if (level === 'easy') pointsEarned = 100;
+                if (level === 'normal') pointsEarned = 300;
+                if (level === 'hard') pointsEarned = 500;
+                users[userId].points += pointsEarned;
+            }
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
+    } else {
+        res.json({ success: false });
+    }
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
 });
