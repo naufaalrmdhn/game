@@ -7,26 +7,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="header">
-        <div id="user-info">
-            <span id="username">Username: <span id="username-value"></span></span>
-            <span id="points">Points: 0</span>
+    <div class="container">
+        <button id="start-button">Start Game</button>
+        <div id="level-selection" class="hidden">
+            <button class="level-button" data-level="easy">Easy</button>
+            <button class="level-button" data-level="normal">Normal</button>
+            <button class="level-button" data-level="hard">Hard</button>
         </div>
+        <div id="game-board" class="board hidden"></div>
     </div>
-    <div id="level-selection" class="hidden">
-        <h2>Select Level</h2>
-        <button class="level-button" data-level="easy">Easy</button>
-        <button class="level-button" data-level="normal">Normal</button>
-        <button class="level-button" data-level="hard">Hard</button>
-    </div>
-    <div id="game-container" class="hidden">
-        <div id="game-header">
-            <span id="stamina">Stamina: <span id="stamina-value">10</span></span>
-            <span id="timer">Time Left: <span id="time-left">0</span></span>
-        </div>
-        <div id="game-board"></div>
-    </div>
-    <button id="start-button">Start Game</button>
     <script src="script.js"></script>
 </body>
 </html>

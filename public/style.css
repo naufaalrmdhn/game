@@ -1,68 +1,93 @@
+/* Basic styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #ffffff;
-    color: #333;
     text-align: center;
     margin: 0;
     padding: 0;
+    background-color: #f0f0f0;
 }
 
-#header {
-    background-color: #f1f1f1;
-    padding: 10px;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    border-bottom: 2px solid #ddd;
+.container {
+    margin: 20px auto;
+    width: fit-content;
 }
 
-#user-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#level-selection, #game-container {
-    margin-top: 60px;
-}
-
+/* Hide elements initially */
 .hidden {
     display: none;
 }
 
-#game-board {
-    display: grid;
-    gap: 5px;
+/* CSS for level selection */
+#level-selection {
     margin: 20px auto;
 }
 
+.level-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s;
+}
+
+.level-button:hover {
+    background-color: #2980b9;
+}
+
+/* CSS for game board */
+.board {
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+/* CSS for cards */
 .card {
     width: 100px;
     height: 100px;
-    background-color: #ccc;
+    background: #ddd;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 24px;
     cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s, transform 0.3s;
 }
 
 .card img {
-    width: 80%;
-    display: none;
+    width: 80px;
+    height: 80px;
+    display: none; /* Hide images initially */
 }
 
 .card.flipped img {
-    display: block;
+    display: block; /* Show image when card is flipped */
 }
 
-.card.matched {
-    background-color: #4caf50;
+.card:hover {
+    background-color: #ccc;
+    transform: scale(1.05);
 }
 
-#game-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 20px;
+/* Responsive Design */
+@media (max-width: 600px) {
+    .card {
+        width: 70px;
+        height: 70px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 400px) {
+    .card {
+        width: 60px;
+        height: 60px;
+        font-size: 16px;
+    }
 }
