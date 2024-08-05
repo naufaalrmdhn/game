@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let points = 0;
     let interval;
     const timerElement = document.getElementById('timer-value');
+    const staminaElement = document.getElementById('stamina-value');
+    const pointsElement = document.getElementById('points-value');
 
     // Show level selection when start button is clicked
     startButton.addEventListener('click', () => {
@@ -48,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
             levelSelection.classList.add('hidden');
             board.classList.remove('hidden');
             createBoard();
+            updatePoints();
+            staminaElement.innerText = userStamina;
         });
     });
 
@@ -95,12 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         matchedPairs = 0;
-        updatePoints();
     }
 
     // Function to flip a card
     function flipCard(card) {
-        if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+        if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched') || userStamina <= 0) return;
 
         card.classList.remove('cover');
         card.classList.add('flipped');
@@ -140,11 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         flippedCards = [];
+        userStamina -= { easy: 1, normal: 3, hard: 5 }[selectedLevel];
+        staminaElement.innerText = userStamina;
     }
 
     // Function to update points
     function updatePoints() {
-        document.getElementById('points-value').innerText = points;
+        pointsElement.innerText = points;
     }
 
     // Setup stamina
@@ -152,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let countdown = 120;
         interval = setInterval(() => {
             countdown--;
-            timerElement.innerText = countdown;
             if (countdown <= 0) {
                 increaseStamina();
                 countdown = 120; // Reset countdown
@@ -163,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to increase stamina
     async function increaseStamina() {
         userStamina++;
-        document.getElementById('stamina-value').innerText = userStamina;
+        staminaElement.innerText = userStamina;
         await fetch('http://localhost:3000/increaseStamina', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -174,4 +178,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize
     fetchUserData();
     setupStaminaTimer();
+
+    async function fetchUserData() {
+        try {
+            const response = await fetch(`http://localhost:3000/getUserData?userId=${userId}`);
+            const data = await response.json();
+            userStamina = data.stamina || 10; // Default to 10 if stamina is not defined
+            points = data.points || 0; // Default to 0 if points are not defined
+            staminaElement.innerText = userStamina;
+            updatePoints();
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    }
 });
