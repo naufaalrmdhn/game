@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameElement = document.getElementById('username');
     const pointsElement = document.getElementById('points');
     const staminaElement = document.getElementById('stamina');
-    const timerElement = document.getElementById('timer');
     let cardElements = [];
     let flippedCards = [];
     let matchedPairs = 0;
@@ -36,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let userId = localStorage.getItem('userId') || 'unknown';
     let points = 0;
     let stamina = 10;
-    let timerInterval;
 
     // Fetch username and update UI
     async function fetchUsername() {
@@ -60,22 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         staminaElement.textContent = `Stamina: ${stamina}`;
     }
 
-    function updateUI() {
-        pointsElement.textContent = `Points: ${points}`;
-        staminaElement.textContent = `Stamina: ${stamina}`;
-    }
-
-    function startTimer() {
-        let time = 0;
-        timerElement.textContent = 'Timer: 0:00';
-        timerInterval = setInterval(() => {
-            time++;
-            const minutes = Math.floor(time / 60);
-            const seconds = time % 60;
-            timerElement.textContent = `Timer: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }, 1000);
-    }
-
     async function updateStamina() {
         if (stamina < 10) {
             stamina++;
@@ -86,6 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ userId: userId, stamina: stamina })
             });
         }
+    }
+
+    function updateUI() {
+        pointsElement.textContent = `Points: ${points}`;
+        staminaElement.textContent = `Stamina: ${stamina}`;
+    }
+
+    function startStaminaTimer() {
+        setInterval(updateStamina, 60000); // Update stamina every 1 minute
     }
 
     startButton.addEventListener('click', () => {
@@ -99,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             levelSelection.classList.add('hidden');
             board.classList.remove('hidden');
             createBoard();
-            startTimer(); // Start the timer when the game begins
+            startStaminaTimer(); // Start the stamina timer when the game begins
         });
     });
 
@@ -152,13 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
             matchedPairs++;
             if (matchedPairs === cardImages[selectedLevel].length) {
                 points += getPointsForLevel(selectedLevel); // Add points only when all pairs are matched
-                fetch('/update-points', {
+                await fetch('/update-points', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: userId, points: points })
                 });
                 alert('Congratulations! You have matched all pairs.');
-                clearInterval(timerInterval); // Stop the timer when game is complete
             }
         } else {
             card1.classList.remove('flipped');
