@@ -48,7 +48,7 @@ app.post('/updateUser', (req, res) => {
 app.post('/increaseStamina', (req, res) => {
     const { userId } = req.body;
     if (users[userId]) {
-        users[userId].stamina += 1;
+        users[userId].stamina++;
         res.json({ success: true, stamina: users[userId].stamina });
     } else {
         res.json({ success: false });

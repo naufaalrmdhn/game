@@ -74,6 +74,10 @@ footer {
     display: none;
 }
 
-.card.flipped img {
-    display: block;
+.card.cover::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #888;
 }
