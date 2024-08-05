@@ -38,26 +38,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch and display points
     async function fetchPoints() {
-        const response = await fetch('/get-points', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId })
-        });
-        const data = await response.json();
-        points = data.points || 0;
-        updateUI();
+        try {
+            const response = await fetch('/get-points', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId })
+            });
+            const data = await response.json();
+            points = data.points || 0;
+            updateUI();
+        } catch (error) {
+            console.error('Error fetching points:', error);
+        }
     }
 
     // Fetch and display stamina
     async function fetchStamina() {
-        const response = await fetch('/get-stamina', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId })
-        });
-        const data = await response.json();
-        stamina = data.stamina || 10;
-        staminaElement.textContent = `Stamina: ${stamina}`;
+        try {
+            const response = await fetch('/get-stamina', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId })
+            });
+            const data = await response.json();
+            stamina = data.stamina || 10;
+            staminaElement.textContent = `Stamina: ${stamina}`;
+        } catch (error) {
+            console.error('Error fetching stamina:', error);
+        }
     }
 
     // Update stamina in the backend
@@ -65,21 +73,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (stamina < 10) {
             stamina++;
             staminaElement.textContent = `Stamina: ${stamina}`;
-            await fetch('/update-stamina', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: userId, stamina: stamina })
-            });
+            try {
+                await fetch('/update-stamina', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userId, stamina: stamina })
+                });
+            } catch (error) {
+                console.error('Error updating stamina:', error);
+            }
         }
     }
 
     // Update points in the backend
     async function updatePoints() {
-        await fetch('/update-points', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId, points: points })
-        });
+        try {
+            await fetch('/update-points', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, points: points })
+            });
+            pointsElement.textContent = `Points: ${points}`; // Update points UI
+        } catch (error) {
+            console.error('Error updating points:', error);
+        }
     }
 
     // Initialize the UI and fetch data
@@ -170,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             matchedPairs++;
             if (matchedPairs === cardImages[selectedLevel].length) {
                 points += levelPoints[selectedLevel];
-                updatePoints(); // Update points in backend
+                updatePoints(); // Update points in backend and UI
                 alert('Congratulations! You have matched all pairs.');
                 resetGame();
             }
