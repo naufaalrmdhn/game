@@ -1,95 +1,104 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const cardImages = {
-        easy: [
-            'images/easy/card1.png',
-            'images/easy/card2.png',
-            'images/easy/card3.png'
-        ],
-        normal: [
-            'images/normal/card1.png',
-            'images/normal/card2.png',
-            'images/normal/card3.png',
-            'images/normal/card4.png'
-        ],
-        hard: [
-            'images/hard/card1.png',
-            'images/hard/card2.png',
-            'images/hard/card3.png',
-            'images/hard/card4.png',
-            'images/hard/card5.png',
-            'images/hard/card6.png'
-        ]
-    };
-
-    const board = document.getElementById('game-board');
-    const startButton = document.getElementById('start-button');
-    const levelSelection = document.getElementById('level-selection');
-    const levelButtons = document.querySelectorAll('.level-button');
+// script.js
+document.addEventListener('DOMContentLoaded', async () => {
     const userId = new URLSearchParams(window.location.search).get('userId');
-    let cardElements = [];
-    let flippedCards = [];
-    let matchedPairs = 0;
-    let selectedLevel = '';
-    let userStamina = 10;
-    let points = 0;
-    let interval;
-    const timerElement = document.getElementById('timer-value');
-    const staminaElement = document.getElementById('stamina-value');
-    const pointsElement = document.getElementById('points-value');
-    let startTime = Date.now();
+    const response = await fetch(`http://localhost:3000/user/${userId}`);
+    const userData = await response.json();
+    const staminaDisplay = document.getElementById('stamina-value');
+    const pointsDisplay = document.getElementById('points');
+    const timerDisplay = document.getElementById('timer-value');
+    let stamina = userData.stamina;
+    let points = userData.points;
+    let timer;
+    let levelImages = [];
 
-    // Show level selection when start button is clicked
-    startButton.addEventListener('click', () => {
-        startButton.classList.add('hidden');
-        levelSelection.classList.remove('hidden');
-    });
+    document.getElementById('username').textContent = `User ${userId}`;
+    pointsDisplay.textContent = points;
+    staminaDisplay.textContent = stamina;
 
-    // Handle level selection
-    levelButtons.forEach(button => {
+    document.querySelectorAll('.level-button').forEach(button => {
         button.addEventListener('click', () => {
-            selectedLevel = button.dataset.level;
-            levelSelection.classList.add('hidden');
-            board.classList.remove('hidden');
-            createBoard();
-            updatePoints();
-            staminaElement.innerText = userStamina;
-            startTime = Date.now(); // Set the start time when starting a new game
-            setupStaminaTimer();
+            startGame(button.dataset.level);
         });
     });
 
-    // Function to create the game board
-    function createBoard() {
+    function updateStamina() {
+        stamina++;
+        staminaDisplay.textContent = stamina;
+        fetch(`http://localhost:3000/user/${userId}/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stamina })
+        });
+    }
+
+    function startGame(level) {
+        document.getElementById('level-selection').classList.add('hidden');
+        document.getElementById('game-container').classList.remove('hidden');
+        createBoard(level);
+        startTimer();
+    }
+
+    function startTimer() {
+        let seconds = 0;
+        timer = setInterval(() => {
+            seconds++;
+            const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${minutes}:${secs}`;
+            if (seconds % 120 === 0) {
+                updateStamina();
+            }
+        }, 1000);
+    }
+
+    function createBoard(level) {
+        const board = document.getElementById('game-board');
         board.innerHTML = '';
         let gridTemplateColumns;
         let gridTemplateRows;
-        const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
+        let images = [];
 
-        switch (selectedLevel) {
+        switch (level) {
             case 'easy':
-                gridTemplateColumns = 'repeat(3, 100px)'; // 3 columns
-                gridTemplateRows = 'repeat(3, 100px)';    // 3 rows
+                images = [
+                    'images/easy/card1.png',
+                    'images/easy/card2.png',
+                    'images/easy/card3.png'
+                ];
+                gridTemplateColumns = 'repeat(3, 100px)';
+                gridTemplateRows = 'repeat(2, 100px)';
                 break;
             case 'normal':
-                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
-                gridTemplateRows = 'repeat(2, 100px)';    // 2 rows
+                images = [
+                    'images/normal/card1.png',
+                    'images/normal/card2.png',
+                    'images/normal/card3.png',
+                    'images/normal/card4.png'
+                ];
+                gridTemplateColumns = 'repeat(4, 100px)';
+                gridTemplateRows = 'repeat(2, 100px)';
                 break;
             case 'hard':
-                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
-                gridTemplateRows = 'repeat(3, 100px)';    // 3 rows
-                break;
-            default:
-                gridTemplateColumns = 'repeat(3, 100px)'; // Default fallback
+                images = [
+                    'images/hard/card1.png',
+                    'images/hard/card2.png',
+                    'images/hard/card3.png',
+                    'images/hard/card4.png',
+                    'images/hard/card5.png',
+                    'images/hard/card6.png'
+                ];
+                gridTemplateColumns = 'repeat(4, 100px)';
                 gridTemplateRows = 'repeat(3, 100px)';
+                break;
         }
 
+        const cards = [...images, ...images].sort(() => 0.5 - Math.random());
         board.style.gridTemplateColumns = gridTemplateColumns;
         board.style.gridTemplateRows = gridTemplateRows;
 
-        cards.forEach((image) => {
+        cards.forEach(image => {
             const card = document.createElement('div');
             card.classList.add('card');
-            card.classList.add('cover');
             card.dataset.image = image;
 
             const img = document.createElement('img');
@@ -98,101 +107,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.addEventListener('click', () => flipCard(card));
             board.appendChild(card);
-            cardElements.push(card);
         });
-
-        matchedPairs = 0;
     }
 
-    // Function to flip a card
     function flipCard(card) {
-        if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched') || userStamina <= 0) return;
-
-        card.classList.remove('cover');
+        if (card.classList.contains('flipped') || document.querySelectorAll('.flipped').length === 2) return;
         card.classList.add('flipped');
-        flippedCards.push(card);
 
+        const flippedCards = document.querySelectorAll('.flipped');
         if (flippedCards.length === 2) {
-            setTimeout(checkForMatch, 1000);
+            setTimeout(() => {
+                checkForMatch(flippedCards);
+            }, 1000);
         }
     }
 
-    // Function to check if two flipped cards match
-    function checkForMatch() {
-        const [card1, card2] = flippedCards;
-        const image1 = card1.dataset.image;
-        const image2 = card2.dataset.image;
-
-        if (image1 === image2) {
-            matchedPairs++;
-            card1.classList.add('matched');
-            card2.classList.add('matched');
-            points += { easy: 100, normal: 300, hard: 500 }[selectedLevel];
-            fetch(`http://localhost:3000/updateUser`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, points })
-            });
-            if (matchedPairs === cardImages[selectedLevel].length) {
-                setTimeout(() => alert('Congratulations! You have matched all pairs.'), 100);
-                levelSelection.classList.remove('hidden');
-                board.classList.add('hidden');
+    function checkForMatch(cards) {
+        const [card1, card2] = cards;
+        if (card1.dataset.image
+            if (card1.dataset.image === card2.dataset.image) {
+                // Match found
+                points += 100; // Example points increase, adjust based on level
+                fetch(`http://localhost:3000/user/${userId}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ points })
+                });
+                document.getElementById('points').textContent = points;
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                if (document.querySelectorAll('.card:not(.matched)').length === 0) {
+                    clearInterval(timer);
+                    alert('Congratulations! You have matched all pairs.');
+                    document.getElementById('level-selection').classList.remove('hidden');
+                    document.getElementById('game-container').classList.add('hidden');
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
             }
-        } else {
-            card1.classList.add('cover');
-            card2.classList.add('cover');
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
         }
-
-        flippedCards = [];
-        userStamina -= { easy: 1, normal: 3, hard: 5 }[selectedLevel];
-        staminaElement.innerText = userStamina;
-    }
-
-    // Function to update points
-    function updatePoints() {
-        pointsElement.innerText = points;
-    }
-
-    // Setup stamina timer
-    function setupStaminaTimer() {
-        let countdown = 120;
-        interval = setInterval(() => {
-            countdown--;
-            if (countdown <= 0) {
-                increaseStamina();
-                countdown = 120; // Reset countdown
+    
+        function updateStamina() {
+            stamina--;
+            if (stamina <= 0) {
+                clearInterval(timer);
+                alert('Game Over! Your stamina has run out.');
+                document.getElementById('level-selection').classList.remove('hidden');
+                document.getElementById('game-container').classList.add('hidden');
+            } else {
+                fetch(`http://localhost:3000/user/${userId}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stamina })
+                });
+                document.getElementById('stamina-value').textContent = stamina;
             }
-            timerElement.innerText = Math.floor((Date.now() - startTime) / 1000); // Update timer every second
-        }, 1000);
-    }
-
-    // Function to increase stamina
-    async function increaseStamina() {
-        userStamina++;
-        staminaElement.innerText = userStamina;
-        await fetch('http://localhost:3000/increaseStamina', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-        });
-    }
-
-    // Initialize
-    fetchUserData();
-    setupStaminaTimer();
-
-    async function fetchUserData() {
-        try {
-            const response = await fetch(`http://localhost:3000/getUserData?userId=${userId}`);
-            const data = await response.json();
-            userStamina = data.stamina || 10; // Default to 10 if stamina is not defined
-            points = data.points || 0; // Default to 0 if points are not defined
-            staminaElement.innerText = userStamina;
-            updatePoints();
-        } catch (error) {
-            console.error('Error fetching user data:', error);
         }
-    }
-});
+    });
+    

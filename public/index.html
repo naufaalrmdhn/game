@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,24 +9,22 @@
 </head>
 <body>
     <header>
-        <div id="user-info">
-            <span id="username">User: <span id="user-id"></span></span>
-            <span id="points">Points: <span id="points-value">0</span></span>
-        </div>
+        <div id="user-info">User: <span id="username"></span> | Points: <span id="points">0</span></div>
     </header>
     <main>
-        <button id="start-button">Start Game</button>
         <div id="level-selection">
             <button class="level-button" data-level="easy">Easy</button>
             <button class="level-button" data-level="normal">Normal</button>
             <button class="level-button" data-level="hard">Hard</button>
         </div>
-        <div id="game-board"></div>
+        <div id="game-container" class="hidden">
+            <div id="game-board"></div>
+            <div id="game-footer">
+                <div id="stamina">Stamina: <span id="stamina-value">10</span></div>
+                <div id="timer">Time: <span id="timer-value">00:00</span></div>
+            </div>
+        </div>
     </main>
-    <footer>
-        <span id="stamina">Stamina: <span id="stamina-value">10</span></span>
-        <span id="timer">Timer: <span id="timer-value">0</span> seconds</span>
-    </footer>
     <script src="script.js"></script>
 </body>
 </html>

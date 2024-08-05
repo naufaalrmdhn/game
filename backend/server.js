@@ -1,38 +1,32 @@
+// server.js
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-
 const app = express();
 const port = 3000;
 
-app.use(cors());
-app.use(bodyParser.json());
+let users = {};
 
-let users = {}; // Simulasi database untuk menyimpan data pengguna
+app.use(express.json());
+app.use(express.static('public'));
 
-app.post('/updateUser', (req, res) => {
-    const { userId, points } = req.body;
+app.get('/user/:id', (req, res) => {
+    const userId = req.params.id;
     if (!users[userId]) {
-        users[userId] = { points: 0, stamina: 10 };
+        users[userId] = { stamina: 10, points: 0 };
     }
-    users[userId].points = points;
-    res.sendStatus(200);
+    res.json(users[userId]);
 });
 
-app.post('/increaseStamina', (req, res) => {
-    const { userId } = req.body;
-    if (users[userId]) {
-        users[userId].stamina = (users[userId].stamina || 10) + 1;
+app.post('/user/:id/update', (req, res) => {
+    const userId = req.params.id;
+    const { stamina, points } = req.body;
+    if (!users[userId]) {
+        users[userId] = { stamina: 10, points: 0 };
     }
-    res.sendStatus(200);
-});
-
-app.get('/getUserData', (req, res) => {
-    const { userId } = req.query;
-    const userData = users[userId] || { points: 0, stamina: 10 };
-    res.json(userData);
+    if (stamina !== undefined) users[userId].stamina = stamina;
+    if (points !== undefined) users[userId].points = points;
+    res.json(users[userId]);
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server is running at http://localhost:${port}`);
 });
