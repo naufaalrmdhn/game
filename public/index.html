@@ -4,34 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <header>
-            <div id="user-info">
-                <span id="user-id"></span> - Points: <span id="points-value">0</span>
-            </div>
-        </header>
+    <header>
+        <div id="user-info">
+            <span id="username">User: <span id="user-id"></span></span>
+            <span id="points">Points: <span id="points-value">0</span></span>
+        </div>
+    </header>
+    <main>
+        <button id="start-button">Start Game</button>
         <div id="level-selection">
-            <h1>Select Level</h1>
-            <button onclick="startGame('easy')">Easy</button>
-            <button onclick="startGame('normal')">Normal</button>
-            <button onclick="startGame('hard')">Hard</button>
+            <button class="level-button" data-level="easy">Easy</button>
+            <button class="level-button" data-level="normal">Normal</button>
+            <button class="level-button" data-level="hard">Hard</button>
         </div>
-        <div id="game-board" style="display:none;">
-            <h1>Memory Game</h1>
-            <div id="board"></div>
-        </div>
-        <footer>
-            <div id="stamina">
-                Stamina: <span id="stamina-value">0</span>
-            </div>
-            <div id="timer">
-                Time until next stamina: <span id="timer-value">0</span> seconds
-            </div>
-        </footer>
-    </div>
+        <div id="game-board"></div>
+    </main>
+    <footer>
+        <span id="stamina">Stamina: <span id="stamina-value">10</span></span>
+        <span id="timer">Timer: <span id="timer-value">0</span> seconds</span>
+    </footer>
     <script src="script.js"></script>
 </body>
 </html>

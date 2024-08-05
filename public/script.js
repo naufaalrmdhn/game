@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerElement = document.getElementById('timer-value');
     const staminaElement = document.getElementById('stamina-value');
     const pointsElement = document.getElementById('points-value');
+    let startTime = Date.now();
 
     // Show level selection when start button is clicked
     startButton.addEventListener('click', () => {
@@ -52,6 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
             createBoard();
             updatePoints();
             staminaElement.innerText = userStamina;
+            startTime = Date.now(); // Set the start time when starting a new game
+            setupStaminaTimer();
         });
     });
 
@@ -152,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pointsElement.innerText = points;
     }
 
-    // Setup stamina
+    // Setup stamina timer
     function setupStaminaTimer() {
         let countdown = 120;
         interval = setInterval(() => {
@@ -161,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 increaseStamina();
                 countdown = 120; // Reset countdown
             }
+            timerElement.innerText = Math.floor((Date.now() - startTime) / 1000); // Update timer every second
         }, 1000);
     }
 

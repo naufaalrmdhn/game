@@ -1,49 +1,38 @@
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+
 const app = express();
 const port = 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-let users = {
-    "exampleUserId": { stamina: 10, points: 0 }
-};
-
-app.get('/user/:userId', (req, res) => {
-    const userId = req.params.userId;
-    if (users[userId]) {
-        res.json(users[userId]);
-    } else {
-        users[userId] = { stamina: 10, points: 0 }; // User baru
-        res.json(users[userId]);
-    }
-});
+let users = {}; // Simulasi database untuk menyimpan data pengguna
 
 app.post('/updateUser', (req, res) => {
-    const { userId, level, won } = req.body;
-    if (users[userId]) {
-        const staminaCost = { easy: 1, normal: 3, hard: 5 }[level];
-        if (won) {
-            users[userId].points += level === 'easy' ? 100 : level === 'normal' ? 300 : 500;
-        }
-        users[userId].stamina -= staminaCost;
-        res.json({ success: true });
-    } else {
-        res.json({ success: false });
+    const { userId, points } = req.body;
+    if (!users[userId]) {
+        users[userId] = { points: 0, stamina: 10 };
     }
+    users[userId].points = points;
+    res.sendStatus(200);
 });
 
 app.post('/increaseStamina', (req, res) => {
     const { userId } = req.body;
     if (users[userId]) {
-        users[userId].stamina++;
-        res.json({ success: true, stamina: users[userId].stamina });
-    } else {
-        res.json({ success: false });
+        users[userId].stamina = (users[userId].stamina || 10) + 1;
     }
+    res.sendStatus(200);
+});
+
+app.get('/getUserData', (req, res) => {
+    const { userId } = req.query;
+    const userData = users[userId] || { points: 0, stamina: 10 };
+    res.json(userData);
 });
 
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`Server running on http://localhost:${port}`);
 });
