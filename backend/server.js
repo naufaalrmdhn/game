@@ -30,30 +30,12 @@ function writeUsersFile(users) {
     }
 }
 
-// Get username (actually just userId for simplicity)
-app.post('/get-username', (req, res) => {
+// Get points
+app.post('/get-points', (req, res) => {
     const { userId } = req.body;
     const users = readUsersFile();
     const user = users[userId] || {};
-    res.json({ username: userId }); // Returning userId instead of username
-});
-
-// Update stamina
-app.post('/update-stamina', (req, res) => {
-    const { userId, stamina } = req.body;
-    const users = readUsersFile();
-    if (!users[userId]) users[userId] = {};
-    users[userId].stamina = stamina;
-    writeUsersFile(users);
-    res.json({ success: true });
-});
-
-// Get stamina
-app.post('/get-stamina', (req, res) => {
-    const { userId } = req.body;
-    const users = readUsersFile();
-    const user = users[userId] || {};
-    res.json({ stamina: user.stamina || 10 });
+    res.json({ points: user.points || 0 });
 });
 
 // Update points
@@ -66,12 +48,22 @@ app.post('/update-points', (req, res) => {
     res.json({ success: true });
 });
 
-// Get points
-app.post('/get-points', (req, res) => {
+// Get stamina
+app.post('/get-stamina', (req, res) => {
     const { userId } = req.body;
     const users = readUsersFile();
     const user = users[userId] || {};
-    res.json({ points: user.points || 0 });
+    res.json({ stamina: user.stamina || 10 });
+});
+
+// Update stamina
+app.post('/update-stamina', (req, res) => {
+    const { userId, stamina } = req.body;
+    const users = readUsersFile();
+    if (!users[userId]) users[userId] = {};
+    users[userId].stamina = stamina;
+    writeUsersFile(users);
+    res.json({ success: true });
 });
 
 app.listen(port, () => {
