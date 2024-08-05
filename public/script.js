@@ -89,24 +89,14 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedLevel = button.dataset.level;
             levelSelection.classList.add('hidden');
             board.classList.remove('hidden');
+            board.className = `board ${selectedLevel}`; // Update class for grid layout
             createBoard();
-            startStaminaTimer(); // Start the stamina timer when the game begins
         });
     });
 
     function createBoard() {
         board.innerHTML = '';
         const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
-
-        const gridSize = {
-            easy: { cols: 3, rows: 2 },
-            normal: { cols: 4, rows: 2 },
-            hard: { cols: 4, rows: 3 }
-        };
-
-        const { cols, rows } = gridSize[selectedLevel];
-        board.style.gridTemplateColumns = `repeat(${cols}, 100px)`;
-        board.style.gridTemplateRows = `repeat(${rows}, 100px)`;
 
         cards.forEach((image) => {
             const card = document.createElement('div');
@@ -171,4 +161,5 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchUsername();
     fetchStamina();
     updateUI();
+    startStaminaTimer(); // Start the stamina timer on page load
 });

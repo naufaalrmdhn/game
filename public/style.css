@@ -4,10 +4,25 @@
     gap: 10px;
     justify-content: center;
     margin: 20px auto;
-    background-color: #fff; /* Set the background color to white */
 }
 
-/* CSS for cards */
+/* CSS for board sizes based on level */
+.board.easy {
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(2, 100px);
+}
+
+.board.normal {
+    grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(2, 100px);
+}
+
+.board.hard {
+    grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(3, 100px);
+}
+
+/* Other CSS styles */
 .card {
     width: 100px;
     height: 100px;
@@ -34,21 +49,4 @@
 .card:hover {
     background-color: #ccc;
     transform: scale(1.05);
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-    .card {
-        width: 70px;
-        height: 70px;
-        font-size: 20px;
-    }
-}
-
-@media (max-width: 400px) {
-    .card {
-        width: 60px;
-        height: 60px;
-        font-size: 16px;
-    }
 }
