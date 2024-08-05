@@ -28,8 +28,11 @@ function writeUsersFile(users) {
 app.post('/get-username', (req, res) => {
     const { userId } = req.body;
     const users = readUsersFile();
-    const user = users[userId] || {};
-    res.json({ username: user.username || userId });
+    if (!users[userId]) {
+        users[userId] = { points: 0, stamina: 10 };
+        writeUsersFile(users);
+    }
+    res.json({ userId: userId });
 });
 
 // Update stamina
@@ -46,7 +49,8 @@ app.post('/update-stamina', (req, res) => {
 app.post('/get-stamina', (req, res) => {
     const { userId } = req.body;
     const users = readUsersFile();
-    const user = users[userId] || { points: 0, stamina: 10 };
+    if (!users[userId]) users[userId] = { points: 0, stamina: 10 };
+    const user = users[userId];
     res.json({ stamina: user.stamina });
 });
 
@@ -64,7 +68,8 @@ app.post('/update-points', (req, res) => {
 app.post('/get-points', (req, res) => {
     const { userId } = req.body;
     const users = readUsersFile();
-    const user = users[userId] || { points: 0, stamina: 10 };
+    if (!users[userId]) users[userId] = { points: 0, stamina: 10 };
+    const user = users[userId];
     res.json({ points: user.points });
 });
 

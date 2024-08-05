@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const levelSelection = document.getElementById('level-selection');
     const levelButtons = document.querySelectorAll('.level-button');
-    const usernameElement = document.getElementById('username');
+    const userIdElement = document.getElementById('user-id');
     const pointsElement = document.getElementById('points');
     const staminaElement = document.getElementById('stamina');
     let cardElements = [];
@@ -42,15 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let stamina = 10;
     let levelPoints = { easy: 100, normal: 300, hard: 500 };
 
-    // Fetch username and update UI
-    async function fetchUsername() {
+    // Fetch userId and update UI
+    async function fetchUserId() {
         const response = await fetch('/get-username', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: userId })
         });
         const data = await response.json();
-        usernameElement.textContent = `UserID: ${userId}`;
+        userIdElement.textContent = `UserID: ${data.userId}`;
     }
 
     // Fetch and display stamina
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize the UI and fetch data
     function initialize() {
-        fetchUsername();
+        fetchUserId();
         fetchStamina();
         fetchPoints();
         setInterval(updateStamina, 60000); // Update stamina every 1 minute
@@ -175,44 +175,38 @@ document.addEventListener('DOMContentLoaded', () => {
         flippedCards.push(card);
 
         if (flippedCards.length === 2) {
-            setTimeout(checkForMatch, 1000);
+            setTimeout(checkMatch, 500); // Check for a match after a short delay
         }
     }
 
     // Function to check if two flipped cards match
-    function checkForMatch() {
+    function checkMatch() {
         const [card1, card2] = flippedCards;
-        const image1 = card1.dataset.image;
-        const image2 = card2.dataset.image;
 
-        if (image1 === image2) {
+        if (card1.dataset.image === card2.dataset.image) {
             matchedPairs++;
+            flippedCards = [];
+
             if (matchedPairs === cardImages[selectedLevel].length) {
-                points += levelPoints[selectedLevel];
-                updatePoints(); // Update points in backend and UI
-                alert('Congratulations! You have matched all pairs.');
-                resetGame();
+                setTimeout(endGame, 500); // End game after a short delay
             }
         } else {
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
-            card1.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
-            card2.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
+            flippedCards.forEach(card => {
+                card.classList.remove('flipped');
+                card.querySelector('.cover').style.display = 'block'; // Show cover again if not matched
+            });
+            flippedCards = [];
         }
-
-        flippedCards = [];
     }
 
-    // Function to reset the game
-    function resetGame() {
-        matchedPairs = 0;
-        cardElements.forEach(card => card.classList.remove('flipped'));
-        cardElements.forEach(card => card.querySelector('.cover').style.display = 'block'); // Show covers
-        cardElements = [];
-        board.innerHTML = '';
+    // Function to end the game
+    function endGame() {
+        points += levelPoints[selectedLevel];
+        updatePoints();
+        alert(`Congratulations! You've completed the ${selectedLevel} level. Points earned: ${levelPoints[selectedLevel]}`);
         board.classList.add('hidden');
         startButton.classList.remove('hidden');
     }
 
-    initialize(); // Initialize everything when DOM is loaded
+    initialize();
 });
