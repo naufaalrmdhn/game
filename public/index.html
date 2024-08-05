@@ -8,6 +8,11 @@
 </head>
 <body>
     <div id="app">
+        <header>
+            <div id="user-info">
+                <span id="user-id"></span> - Points: <span id="points-value">0</span>
+            </div>
+        </header>
         <div id="level-selection">
             <h1>Select Level</h1>
             <button onclick="startGame('easy')">Easy</button>
@@ -17,9 +22,15 @@
         <div id="game-board" style="display:none;">
             <h1>Memory Game</h1>
             <div id="board"></div>
-            <div id="stamina">Stamina: <span id="stamina-value">0</span></div>
-            <div id="points">Points: <span id="points-value">0</span></div>
         </div>
+        <footer>
+            <div id="stamina">
+                Stamina: <span id="stamina-value">0</span>
+            </div>
+            <div id="timer">
+                Time until next stamina: <span id="timer-value">0</span> seconds
+            </div>
+        </footer>
     </div>
     <script src="script.js"></script>
 </body>

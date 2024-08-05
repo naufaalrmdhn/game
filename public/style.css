@@ -14,6 +14,26 @@ body {
     max-width: 500px;
 }
 
+header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+}
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 500px;
+}
+
 #level-selection {
     margin-top: 20px;
 }

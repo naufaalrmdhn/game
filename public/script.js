@@ -6,8 +6,35 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchUserData() {
         const response = await fetch(`http://localhost:3000/user/${userId}`);
         const user = await response.json();
+        document.getElementById('user-id').innerText = userId;
         document.getElementById('stamina-value').innerText = user.stamina;
         document.getElementById('points-value').innerText = user.points;
+    }
+
+    // Timer for stamina increase
+    let staminaTimer = 120; // 2 minutes
+    setInterval(() => {
+        staminaTimer--;
+        document.getElementById('timer-value').innerText = staminaTimer;
+        if (staminaTimer === 0) {
+            staminaTimer = 120;
+            increaseStamina();
+        }
+    }, 1000);
+
+    // Function to increase stamina
+    async function increaseStamina() {
+        const response = await fetch('http://localhost:3000/increaseStamina', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ userId })
+        });
+        const result = await response.json();
+        if (result.success) {
+            document.getElementById('stamina-value').innerText = result.stamina;
+        }
     }
 
     // Start game function
@@ -30,9 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (level === 'easy') {
                 boardSize = 3;
             } else if (level === 'normal') {
-                boardSize = 2; // Grid is 2x4 for normal
+                boardSize = 4; // Grid is 4x4 for normal
             } else if (level === 'hard') {
-                boardSize = 4;
+                boardSize = 5;
             }
 
             const board = document.getElementById('board');
