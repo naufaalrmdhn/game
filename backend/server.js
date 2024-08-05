@@ -13,6 +13,9 @@ const usersFilePath = path.join(__dirname, 'users.json');
 
 // Helper function to read users file
 function readUsersFile() {
+    if (!fs.existsSync(usersFilePath)) {
+        fs.writeFileSync(usersFilePath, JSON.stringify({}, null, 2));
+    }
     return JSON.parse(fs.readFileSync(usersFilePath, 'utf8'));
 }
 
