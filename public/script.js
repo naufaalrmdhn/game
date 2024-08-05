@@ -25,27 +25,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const levelSelection = document.getElementById('level-selection');
     const levelButtons = document.querySelectorAll('.level-button');
-    const userIdElement = document.getElementById('user-id');
+    const usernameElement = document.getElementById('username');
     const pointsElement = document.getElementById('points');
     const staminaElement = document.getElementById('stamina');
     let cardElements = [];
     let flippedCards = [];
     let matchedPairs = 0;
     let selectedLevel = '';
-    let userId = localStorage.getItem('userId') || 'unknown';
+    let userId = new URLSearchParams(window.location.search).get('userId') || 'unknown';
     let points = 0;
     let stamina = 10;
     let levelPoints = { easy: 100, normal: 300, hard: 500 };
 
-    // Fetch userId and update UI
-    async function fetchUserId() {
+    // Fetch username and update UI
+    async function fetchUsername() {
         const response = await fetch('/get-username', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: userId })
         });
         const data = await response.json();
-        userIdElement.textContent = `UserID: ${data.userId}`;
+        usernameElement.textContent = `Username: ${data.username || 'unknown'}`;
     }
 
     // Fetch and display stamina
@@ -58,18 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         stamina = data.stamina || 10;
         staminaElement.textContent = `Stamina: ${stamina}`;
-    }
-
-    // Fetch and display points
-    async function fetchPoints() {
-        const response = await fetch('/get-points', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId })
-        });
-        const data = await response.json();
-        points = data.points || 0;
-        pointsElement.textContent = `Points: ${points}`;
     }
 
     // Update stamina in the backend
@@ -97,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize the UI and fetch data
     function initialize() {
-        fetchUserId();
+        fetchUsername();
         fetchStamina();
         fetchPoints();
         setInterval(updateStamina, 60000); // Update stamina every 1 minute
@@ -166,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
 
         card.classList.add('flipped');
-        card.querySelector('.cover').style.display =
         card.querySelector('.cover').style.display = 'none'; // Hide cover when flipped
         flippedCards.push(card);
 
@@ -205,10 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cardElements.forEach(card => card.classList.remove('flipped'));
         cardElements.forEach(card => card.querySelector('.cover').style.display = 'block'); // Show covers
         cardElements = [];
-        board.innerHTML = '';
         board.classList.add('hidden');
         startButton.classList.remove('hidden');
     }
 
-    initialize(); // Initialize everything when DOM is loaded
+    // Initialize the application
+    initialize();
 });
