@@ -22,6 +22,20 @@
         </div>
         <div id="game-board" class="hidden"></div>
     </div>
+    <script>
+        // Check if userId exists in the URL or localStorage
+        let userId = new URLSearchParams(window.location.search).get('userId');
+        if (!userId) {
+            userId = localStorage.getItem('userId');
+        }
+        if (!userId) {
+            alert('Please login through Telegram to access the game.');
+            // Optionally redirect to a login page or Telegram bot
+        } else {
+            localStorage.setItem('userId', userId);
+            document.getElementById('user-id').textContent = `UserID: ${userId}`;
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

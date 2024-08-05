@@ -32,12 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let flippedCards = [];
     let matchedPairs = 0;
     let selectedLevel = '';
-    let userId = new URLSearchParams(window.location.search).get('userId');
-    if (!userId) {
-        userId = localStorage.getItem('userId') || 'unknown';
-    } else {
-        localStorage.setItem('userId', userId);
-    }
+    let userId = localStorage.getItem('userId') || 'unknown';
     let points = 0;
     let stamina = 10;
     let levelPoints = { easy: 100, normal: 300, hard: 500 };
