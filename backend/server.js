@@ -21,38 +21,25 @@ function writeUsersFile(users) {
     fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
 }
 
-// Get username
-app.post('/get-username', (req, res) => {
+// Get user data
+app.post('/get-user', (req, res) => {
     const { userId } = req.body;
     const users = readUsersFile();
     const user = users[userId] || {};
-    res.json({ username: user.username || 'unknown' });
+    res.json({ 
+        userId: userId,
+        points: user.points || 0,
+        stamina: user.stamina || 10 
+    });
 });
 
-// Update stamina
-app.post('/update-stamina', (req, res) => {
-    const { userId, stamina } = req.body;
+// Update user data
+app.post('/update-user', (req, res) => {
+    const { userId, points, stamina } = req.body;
     const users = readUsersFile();
     if (!users[userId]) users[userId] = {};
-    users[userId].stamina = stamina;
-    writeUsersFile(users);
-    res.json({ success: true });
-});
-
-// Get stamina
-app.post('/get-stamina', (req, res) => {
-    const { userId } = req.body;
-    const users = readUsersFile();
-    const user = users[userId] || {};
-    res.json({ stamina: user.stamina || 10 });
-});
-
-// Update points
-app.post('/update-points', (req, res) => {
-    const { userId, points } = req.body;
-    const users = readUsersFile();
-    if (!users[userId]) users[userId] = {};
-    users[userId].points = points;
+    if (points !== undefined) users[userId].points = points;
+    if (stamina !== undefined) users[userId].stamina = stamina;
     writeUsersFile(users);
     res.json({ success: true });
 });

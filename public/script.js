@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const levelSelection = document.getElementById('level-selection');
     const levelButtons = document.querySelectorAll('.level-button');
-    const usernameElement = document.getElementById('username');
+    const userIdElement = document.getElementById('user-id');
     const pointsElement = document.getElementById('points');
     const staminaElement = document.getElementById('stamina');
     let cardElements = [];
@@ -37,56 +37,33 @@ document.addEventListener('DOMContentLoaded', () => {
     let stamina = 10;
     let levelPoints = { easy: 100, normal: 300, hard: 500 };
 
-    // Fetch username and update UI
-    async function fetchUsername() {
-        const response = await fetch('/get-username', {
+    // Fetch user data and update UI
+    async function fetchUserData() {
+        const response = await fetch('/get-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: userId })
         });
         const data = await response.json();
-        usernameElement.textContent = `Username: ${data.username || 'unknown'}`;
-    }
-
-    // Fetch and display stamina
-    async function fetchStamina() {
-        const response = await fetch('/get-stamina', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId })
-        });
-        const data = await response.json();
-        stamina = data.stamina || 10;
+        points = data.points;
+        stamina = data.stamina;
+        userIdElement.textContent = `UserID: ${userId}`;
+        pointsElement.textContent = `Points: ${points}`;
         staminaElement.textContent = `Stamina: ${stamina}`;
     }
 
-    // Update stamina in the backend
-    async function updateStamina() {
-        if (stamina < 10) {
-            stamina++;
-            staminaElement.textContent = `Stamina: ${stamina}`;
-            await fetch('/update-stamina', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: userId, stamina: stamina })
-            });
-        }
-    }
-
-    // Update points in the backend
-    async function updatePoints() {
-        await fetch('/update-points', {
+    // Update user data in the backend
+    async function updateUser() {
+        await fetch('/update-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId, points: points })
+            body: JSON.stringify({ userId: userId, points: points, stamina: stamina })
         });
-        pointsElement.textContent = `Points: ${points}`; // Update points UI
     }
 
     // Initialize the UI and fetch data
     function initialize() {
-        fetchUsername();
-        fetchStamina();
+        fetchUserData();
         setInterval(updateStamina, 60000); // Update stamina every 1 minute
     }
 
@@ -171,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             matchedPairs++;
             if (matchedPairs === cardImages[selectedLevel].length) {
                 points += levelPoints[selectedLevel];
-                updatePoints(); // Update points in backend and UI
+                updateUser(); // Update user data in backend
                 alert('Congratulations! You have matched all pairs.');
                 resetGame();
             }
