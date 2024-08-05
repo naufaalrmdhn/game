@@ -169,9 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (image1 === image2) {
             matchedPairs++;
-            points += levelPoints[selectedLevel];
-            updatePoints(); // Update points in backend and UI
             if (matchedPairs === cardImages[selectedLevel].length) {
+                points += levelPoints[selectedLevel];
+                updatePoints(); // Update points in backend and UI
                 alert('Congratulations! You have matched all pairs.');
                 resetGame();
             }
