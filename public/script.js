@@ -38,8 +38,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let stamina = 10;
     let timerInterval;
 
+    // Fetch username and update UI
+    async function fetchUsername() {
+        const response = await fetch('/get-username', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        });
+        const data = await response.json();
+        usernameElement.textContent = `Username: ${data.username || 'unknown'}`;
+    }
+
+    async function fetchStamina() {
+        const response = await fetch('/get-stamina', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        });
+        const data = await response.json();
+        stamina = data.stamina || 10;
+        staminaElement.textContent = `Stamina: ${stamina}`;
+    }
+
     function updateUI() {
-        usernameElement.textContent = `Username: ${userId}`;
         pointsElement.textContent = `Points: ${points}`;
         staminaElement.textContent = `Stamina: ${stamina}`;
     }
@@ -52,17 +73,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const minutes = Math.floor(time / 60);
             const seconds = time % 60;
             timerElement.textContent = `Timer: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            // Update stamina every minute
-            if (time % 60 === 0) {
-                stamina = Math.min(stamina + 1, 10);
-                staminaElement.textContent = `Stamina: ${stamina}`;
-                fetch('/update-stamina', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: userId })
-                });
-            }
         }, 1000);
+    }
+
+    async function updateStamina() {
+        if (stamina < 10) {
+            stamina++;
+            staminaElement.textContent = `Stamina: ${stamina}`;
+            await fetch('/update-stamina', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, stamina: stamina })
+            });
+        }
     }
 
     startButton.addEventListener('click', () => {
@@ -154,5 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Initialize UI and fetch user data
+    fetchUsername();
+    fetchStamina();
     updateUI();
 });
