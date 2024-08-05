@@ -4,29 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Game</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <div id="user-info">
-                <span id="username">Username: <span id="username-value"></span></span>
-                <span id="points">Points: <span id="points-value">0</span></span>
+                <span id="username">Username: Loading...</span>
+                <span id="points">Points: 0</span>
+            </div>
+            <div id="game-info">
+                <span id="stamina">Stamina: 10</span>
+                <span id="timer">Timer: 0:00</span>
             </div>
         </header>
-
-        <div id="level-selection" class="hidden">
-            <button class="level-button" data-level="easy">Easy</button>
-            <button class="level-button" data-level="normal">Normal</button>
-            <button class="level-button" data-level="hard">Hard</button>
-        </div>
-
-        <div id="game-board" class="board hidden"></div>
-
-        <footer>
-            <div id="stamina">Stamina: <span id="stamina-value">10</span></div>
-            <div id="timer">Time: <span id="timer-value">0</span> seconds</div>
+        <main>
             <button id="start-button">Start Game</button>
+            <div id="level-selection" class="hidden">
+                <button class="level-button" data-level="easy">Easy</button>
+                <button class="level-button" data-level="normal">Normal</button>
+                <button class="level-button" data-level="hard">Hard</button>
+            </div>
+            <div id="game-board" class="hidden board"></div>
+        </main>
+        <footer>
+            <button id="reset-button">Reset Game</button>
         </footer>
     </div>
     <script src="script.js"></script>

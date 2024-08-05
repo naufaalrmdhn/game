@@ -25,64 +25,74 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const levelSelection = document.getElementById('level-selection');
     const levelButtons = document.querySelectorAll('.level-button');
-    const staminaDisplay = document.getElementById('stamina-value');
-    const pointsDisplay = document.getElementById('points-value');
-    const timerDisplay = document.getElementById('timer-value');
-    const usernameDisplay = document.getElementById('username-value');
-    
+    const usernameElement = document.getElementById('username');
+    const pointsElement = document.getElementById('points');
+    const staminaElement = document.getElementById('stamina');
+    const timerElement = document.getElementById('timer');
     let cardElements = [];
     let flippedCards = [];
     let matchedPairs = 0;
     let selectedLevel = '';
-    let userId = new URLSearchParams(window.location.search).get('userId');
-    let stamina = 10;
+    let userId = localStorage.getItem('userId') || 'unknown';
     let points = 0;
-    let timer = 0;
+    let stamina = 10;
     let timerInterval;
-    
-    // Fetch user data
-    fetch(`http://localhost:3000/user/${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            points = data.points || 0;
-            stamina = data.stamina || 10;
-            usernameDisplay.textContent = `User ${userId}`;
-            pointsDisplay.textContent = points;
-            staminaDisplay.textContent = stamina;
-            startTimer();
-        });
+
+    function updateUI() {
+        usernameElement.textContent = `Username: ${userId}`;
+        pointsElement.textContent = `Points: ${points}`;
+        staminaElement.textContent = `Stamina: ${stamina}`;
+    }
 
     function startTimer() {
+        let time = 0;
+        timerElement.textContent = 'Timer: 0:00';
         timerInterval = setInterval(() => {
-            timer++;
-            timerDisplay.textContent = timer;
-            if (timer % 120 === 0) { // Every 2 minutes
-                stamina++;
-                staminaDisplay.textContent = stamina;
+            time++;
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            timerElement.textContent = `Timer: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            // Update stamina every minute
+            if (time % 60 === 0) {
+                stamina = Math.min(stamina + 1, 10);
+                staminaElement.textContent = `Stamina: ${stamina}`;
+                fetch('/update-stamina', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userId })
+                });
             }
         }, 1000);
     }
 
-    // Show level selection when start button is clicked
     startButton.addEventListener('click', () => {
         startButton.classList.add('hidden');
         levelSelection.classList.remove('hidden');
     });
 
-    // Handle level selection
     levelButtons.forEach(button => {
         button.addEventListener('click', () => {
             selectedLevel = button.dataset.level;
             levelSelection.classList.add('hidden');
             board.classList.remove('hidden');
             createBoard();
+            startTimer(); // Start the timer when the game begins
         });
     });
 
-    // Function to create the game board
     function createBoard() {
         board.innerHTML = '';
         const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
+
+        const gridSize = {
+            easy: { cols: 3, rows: 2 },
+            normal: { cols: 4, rows: 2 },
+            hard: { cols: 4, rows: 3 }
+        };
+
+        const { cols, rows } = gridSize[selectedLevel];
+        board.style.gridTemplateColumns = `repeat(${cols}, 100px)`;
+        board.style.gridTemplateRows = `repeat(${rows}, 100px)`;
 
         cards.forEach((image) => {
             const card = document.createElement('div');
@@ -99,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Function to flip a card
     function flipCard(card) {
         if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
 
@@ -111,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Function to check if two flipped cards match
     function checkForMatch() {
         const [card1, card2] = flippedCards;
         const image1 = card1.dataset.image;
@@ -119,14 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (image1 === image2) {
             matchedPairs++;
-            points += getPointsForLevel(selectedLevel);
-            pointsDisplay.textContent = points;
-            updateUserData();
             if (matchedPairs === cardImages[selectedLevel].length) {
+                points += getPointsForLevel(selectedLevel); // Add points only when all pairs are matched
+                fetch('/update-points', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userId, points: points })
+                });
                 alert('Congratulations! You have matched all pairs.');
-                levelSelection.classList.remove('hidden');
-                board.classList.add('hidden');
-                resetGame();
+                clearInterval(timerInterval); // Stop the timer when game is complete
             }
         } else {
             card1.classList.remove('flipped');
@@ -138,33 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getPointsForLevel(level) {
         switch (level) {
-            case 'easy':
-                return 100;
-            case 'normal':
-                return 300;
-            case 'hard':
-                return 500;
-            default:
-                return 0;
+            case 'easy': return 100;
+            case 'normal': return 300;
+            case 'hard': return 500;
+            default: return 0;
         }
     }
 
-    function updateUserData() {
-        fetch(`http://localhost:3000/user/${userId}/update`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ points, stamina }),
-        });
-    }
-
-    function resetGame() {
-        cardElements = [];
-        flippedCards = [];
-        matchedPairs = 0;
-        stamina--; // Deduct stamina after game is over
-        staminaDisplay.textContent = stamina;
-        updateUserData();
-    }
+    updateUI();
 });

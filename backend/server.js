@@ -1,34 +1,63 @@
 const express = require('express');
 const app = express();
 const port = 3000;
+const path = require('path');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const fs = require('fs');
 
-app.use(express.json());
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-let users = {};
+const usersFilePath = './users.json';
+let users = {}; // Initialize an empty object
 
-app.post('/user/:userId/update', (req, res) => {
-    const userId = req.params.userId;
-    const { points, stamina } = req.body;
+// Load users from file
+if (fs.existsSync(usersFilePath)) {
+    users = JSON.parse(fs.readFileSync(usersFilePath, 'utf-8'));
+}
+
+// Middleware to update stamina every minute
+setInterval(() => {
+    const now = Date.now();
+    for (const userId in users) {
+        const user = users[userId];
+        if (user.stamina < 10) { // Example max stamina
+            const timeDiff = now - user.lastUpdated;
+            if (timeDiff >= 60000) { // 1 minute
+                user.stamina = Math.min(user.stamina + 1, 10);
+                user.lastUpdated = now;
+                saveUsers();
+            }
+        }
+    }
+}, 60000);
+
+app.post('/update-points', (req, res) => {
+    const { userId, points } = req.body;
 
     if (!users[userId]) {
-        users[userId] = { points: 0, stamina: 10 };
+        users[userId] = { stamina: 10, points: 0, lastUpdated: Date.now() };
     }
 
-    if (points !== undefined) {
-        users[userId].points = points;
-    }
-
-    if (stamina !== undefined) {
-        users[userId].stamina = stamina;
-    }
-
-    res.status(200).json(users[userId]);
+    users[userId].points += points;
+    saveUsers();
+    res.sendStatus(200);
 });
 
-app.get('/user/:userId', (req, res) => {
-    const userId = req.params.userId;
-    res.status(200).json(users[userId] || { points: 0, stamina: 10 });
+app.post('/update-stamina', (req, res) => {
+    const { userId } = req.body;
+    if (!users[userId]) {
+        users[userId] = { stamina: 10, points: 0, lastUpdated: Date.now() };
+    }
+
+    res.json({ stamina: users[userId].stamina });
 });
+
+function saveUsers() {
+    fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
+}
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
