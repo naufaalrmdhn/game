@@ -15,7 +15,7 @@ app.get('/user/:userId', (req, res) => {
     if (users[userId]) {
         res.json(users[userId]);
     } else {
-        users[userId] = { stamina: 10, points: 0 };
+        users[userId] = { stamina: 10, points: 0 }; // User baru
         res.json(users[userId]);
     }
 });
@@ -23,23 +23,12 @@ app.get('/user/:userId', (req, res) => {
 app.post('/updateUser', (req, res) => {
     const { userId, level, won } = req.body;
     if (users[userId]) {
-        let staminaCost;
-        if (level === 'easy') staminaCost = 1;
-        if (level === 'normal') staminaCost = 3;
-        if (level === 'hard') staminaCost = 5;
-        if (users[userId].stamina >= staminaCost) {
-            users[userId].stamina -= staminaCost;
-            if (won) {
-                let pointsEarned;
-                if (level === 'easy') pointsEarned = 100;
-                if (level === 'normal') pointsEarned = 300;
-                if (level === 'hard') pointsEarned = 500;
-                users[userId].points += pointsEarned;
-            }
-            res.json({ success: true });
-        } else {
-            res.json({ success: false });
+        const staminaCost = { easy: 1, normal: 3, hard: 5 }[level];
+        if (won) {
+            users[userId].points += level === 'easy' ? 100 : level === 'normal' ? 300 : 500;
         }
+        users[userId].stamina -= staminaCost;
+        res.json({ success: true });
     } else {
         res.json({ success: false });
     }
