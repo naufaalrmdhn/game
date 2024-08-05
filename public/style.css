@@ -5,16 +5,24 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #f0f0f0;
+    margin: 0;
 }
 
 #app {
     text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+#level-selection {
+    margin-top: 20px;
 }
 
 #level-selection button {
     margin: 10px;
     padding: 10px 20px;
     font-size: 16px;
+    cursor: pointer;
 }
 
 #game-board {
@@ -23,7 +31,6 @@ body {
 
 #board {
     display: grid;
-    grid-template-columns: repeat(3, 100px);
     gap: 10px;
     justify-content: center;
     margin-top: 20px;
@@ -38,9 +45,15 @@ body {
     align-items: center;
     cursor: pointer;
     font-size: 24px;
+    position: relative;
 }
 
-#stamina, #points {
-    margin-top: 20px;
-    font-size: 18px;
+.card img {
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+.card.flipped img {
+    display: block;
 }
