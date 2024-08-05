@@ -1,33 +1,158 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('userId');
-    let userStamina = 10; // Stamina awal
+    const cardImages = {
+        easy: [
+            'images/easy/card1.png',
+            'images/easy/card2.png',
+            'images/easy/card3.png'
+        ],
+        normal: [
+            'images/normal/card1.png',
+            'images/normal/card2.png',
+            'images/normal/card3.png',
+            'images/normal/card4.png'
+        ],
+        hard: [
+            'images/hard/card1.png',
+            'images/hard/card2.png',
+            'images/hard/card3.png',
+            'images/hard/card4.png',
+            'images/hard/card5.png',
+            'images/hard/card6.png'
+        ]
+    };
+
+    const board = document.getElementById('game-board');
+    const startButton = document.getElementById('start-button');
+    const levelSelection = document.getElementById('level-selection');
+    const levelButtons = document.querySelectorAll('.level-button');
+    const userId = new URLSearchParams(window.location.search).get('userId');
+    let cardElements = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let selectedLevel = '';
+    let userStamina = 10;
     let points = 0;
-    let staminaTimer = 0; // Timer stamina
-    let countdown = 120; // 2 menit untuk stamina
     let interval;
+    const timerElement = document.getElementById('timer-value');
 
-    // Fetch user data from backend
-    async function fetchUserData() {
-        const response = await fetch(`http://localhost:3000/user/${userId}`);
-        const user = await response.json();
-        userStamina = user.stamina;
-        points = user.points;
-        document.getElementById('user-id').innerText = userId;
-        document.getElementById('stamina-value').innerText = userStamina;
-        document.getElementById('points-value').innerText = points;
+    // Show level selection when start button is clicked
+    startButton.addEventListener('click', () => {
+        startButton.classList.add('hidden');
+        levelSelection.classList.remove('hidden');
+    });
 
-        // Set up timer for stamina increase
-        setupStaminaTimer();
+    // Handle level selection
+    levelButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            selectedLevel = button.dataset.level;
+            levelSelection.classList.add('hidden');
+            board.classList.remove('hidden');
+            createBoard();
+        });
+    });
+
+    // Function to create the game board
+    function createBoard() {
+        board.innerHTML = '';
+        let gridTemplateColumns;
+        let gridTemplateRows;
+        const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
+
+        switch (selectedLevel) {
+            case 'easy':
+                gridTemplateColumns = 'repeat(3, 100px)'; // 3 columns
+                gridTemplateRows = 'repeat(3, 100px)';    // 3 rows
+                break;
+            case 'normal':
+                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
+                gridTemplateRows = 'repeat(2, 100px)';    // 2 rows
+                break;
+            case 'hard':
+                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
+                gridTemplateRows = 'repeat(3, 100px)';    // 3 rows
+                break;
+            default:
+                gridTemplateColumns = 'repeat(3, 100px)'; // Default fallback
+                gridTemplateRows = 'repeat(3, 100px)';
+        }
+
+        board.style.gridTemplateColumns = gridTemplateColumns;
+        board.style.gridTemplateRows = gridTemplateRows;
+
+        cards.forEach((image) => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.classList.add('cover');
+            card.dataset.image = image;
+
+            const img = document.createElement('img');
+            img.src = image;
+            card.appendChild(img);
+
+            card.addEventListener('click', () => flipCard(card));
+            board.appendChild(card);
+            cardElements.push(card);
+        });
+
+        matchedPairs = 0;
+        updatePoints();
     }
 
-    // Set up stamina timer
+    // Function to flip a card
+    function flipCard(card) {
+        if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+        card.classList.remove('cover');
+        card.classList.add('flipped');
+        flippedCards.push(card);
+
+        if (flippedCards.length === 2) {
+            setTimeout(checkForMatch, 1000);
+        }
+    }
+
+    // Function to check if two flipped cards match
+    function checkForMatch() {
+        const [card1, card2] = flippedCards;
+        const image1 = card1.dataset.image;
+        const image2 = card2.dataset.image;
+
+        if (image1 === image2) {
+            matchedPairs++;
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            points += { easy: 100, normal: 300, hard: 500 }[selectedLevel];
+            fetch(`http://localhost:3000/updateUser`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, points })
+            });
+            if (matchedPairs === cardImages[selectedLevel].length) {
+                setTimeout(() => alert('Congratulations! You have matched all pairs.'), 100);
+                levelSelection.classList.remove('hidden');
+                board.classList.add('hidden');
+            }
+        } else {
+            card1.classList.add('cover');
+            card2.classList.add('cover');
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+        }
+
+        flippedCards = [];
+    }
+
+    // Function to update points
+    function updatePoints() {
+        document.getElementById('points-value').innerText = points;
+    }
+
+    // Setup stamina
     function setupStaminaTimer() {
-        countdown = 120;
-        clearInterval(interval);
+        let countdown = 120;
         interval = setInterval(() => {
             countdown--;
-            document.getElementById('timer-value').innerText = countdown;
+            timerElement.innerText = countdown;
             if (countdown <= 0) {
                 increaseStamina();
                 countdown = 120; // Reset countdown
@@ -37,89 +162,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to increase stamina
     async function increaseStamina() {
-        const response = await fetch(`http://localhost:3000/increaseStamina`, {
+        userStamina++;
+        document.getElementById('stamina-value').innerText = userStamina;
+        await fetch('http://localhost:3000/increaseStamina', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId })
         });
-        const result = await response.json();
-        if (result.success) {
-            userStamina = result.stamina;
-            document.getElementById('stamina-value').innerText = userStamina;
-        }
     }
 
-    // Start game function
-    window.startGame = async (level) => {
-        const staminaCost = { easy: 1, normal: 3, hard: 5 }[level];
-        if (userStamina >= staminaCost) {
-            userStamina -= staminaCost;
-            document.getElementById('stamina-value').innerText = userStamina;
-            document.getElementById('level-selection').style.display = 'none';
-            document.getElementById('game-board').style.display = 'block';
-
-            // Initialize game board for Easy level (2x3)
-            const board = document.getElementById('board');
-            board.innerHTML = '';
-            board.style.gridTemplateColumns = 'repeat(3, 100px)';
-
-            const cardSet = [];
-            for (let i = 1; i <= 3; i++) {
-                cardSet.push(i, i); // Duplikat gambar
-            }
-            cardSet.sort(() => 0.5 - Math.random());
-
-            cardSet.forEach(number => {
-                const card = document.createElement('div');
-                card.className = 'card cover';
-                card.innerHTML = `<img src="/images/easy/card${number}.png" alt="Card ${number}">`;
-                card.addEventListener('click', () => flipCard(card));
-                board.appendChild(card);
-            });
-
-            let flippedCards = [];
-            function flipCard(card) {
-                if (flippedCards.length < 2 && !card.classList.contains('flipped') && !card.classList.contains('matched')) {
-                    card.classList.remove('cover');
-                    card.classList.add('flipped');
-                    flippedCards.push(card);
-                    card.querySelector('img').style.display = 'block';
-
-                    if (flippedCards.length === 2) {
-                        setTimeout(() => {
-                            const [firstCard, secondCard] = flippedCards;
-                            if (firstCard.querySelector('img').src === secondCard.querySelector('img').src) {
-                                // Matched
-                                firstCard.classList.add('matched');
-                                secondCard.classList.add('matched');
-                                points += 100; // Tambah poin jika menang
-                                document.getElementById('points-value').innerText = points;
-                                // Send result to backend
-                                fetch('http://localhost:3000/updateUser', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ userId, level, won: true })
-                                });
-                            } else {
-                                // Not matched
-                                firstCard.classList.add('cover');
-                                secondCard.classList.add('cover');
-                                firstCard.querySelector('img').style.display = 'none';
-                                secondCard.querySelector('img').style.display = 'none';
-                            }
-                            flippedCards = [];
-                        }, 1000);
-                    }
-                }
-            }
-        } else {
-            alert('Not enough stamina to play this level.');
-        }
-    };
-
+    // Initialize
     fetchUserData();
+    setupStaminaTimer();
 });
