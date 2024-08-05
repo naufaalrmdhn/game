@@ -166,42 +166,49 @@ document.addEventListener('DOMContentLoaded', () => {
         if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
 
         card.classList.add('flipped');
+        card.querySelector('.cover').style.display =
         card.querySelector('.cover').style.display = 'none'; // Hide cover when flipped
         flippedCards.push(card);
 
         if (flippedCards.length === 2) {
-            setTimeout(checkMatch, 500); // Check for a match after a short delay
+            setTimeout(checkForMatch, 1000);
         }
     }
 
     // Function to check if two flipped cards match
-    function checkMatch() {
+    function checkForMatch() {
         const [card1, card2] = flippedCards;
+        const image1 = card1.dataset.image;
+        const image2 = card2.dataset.image;
 
-        if (card1.dataset.image === card2.dataset.image) {
+        if (image1 === image2) {
             matchedPairs++;
-            flippedCards = [];
-
             if (matchedPairs === cardImages[selectedLevel].length) {
-                setTimeout(endGame, 500); // End game after a short delay
+                points += levelPoints[selectedLevel];
+                updatePoints(); // Update points in backend and UI
+                alert('Congratulations! You have matched all pairs.');
+                resetGame();
             }
         } else {
-            flippedCards.forEach(card => {
-                card.classList.remove('flipped');
-                card.querySelector('.cover').style.display = 'block'; // Show cover again if not matched
-            });
-            flippedCards = [];
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+            card1.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
+            card2.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
         }
+
+        flippedCards = [];
     }
 
-    // Function to end the game
-    function endGame() {
-        points += levelPoints[selectedLevel];
-        updatePoints();
-        alert(`Congratulations! You've completed the ${selectedLevel} level. Points earned: ${levelPoints[selectedLevel]}`);
+    // Function to reset the game
+    function resetGame() {
+        matchedPairs = 0;
+        cardElements.forEach(card => card.classList.remove('flipped'));
+        cardElements.forEach(card => card.querySelector('.cover').style.display = 'block'); // Show covers
+        cardElements = [];
+        board.innerHTML = '';
         board.classList.add('hidden');
         startButton.classList.remove('hidden');
     }
 
-    initialize();
+    initialize(); // Initialize everything when DOM is loaded
 });
