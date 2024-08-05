@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,23 +7,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div id="user-info">User: <span id="username"></span> | Points: <span id="points">0</span></div>
-    </header>
-    <main>
-        <div id="level-selection">
-            <button class="level-button" data-level="easy">Easy</button>
-            <button class="level-button" data-level="normal">Normal</button>
-            <button class="level-button" data-level="hard">Hard</button>
+    <div id="header">
+        <div id="user-info">
+            <span id="username">Username: <span id="username-value"></span></span>
+            <span id="points">Points: 0</span>
         </div>
-        <div id="game-container" class="hidden">
-            <div id="game-board"></div>
-            <div id="game-footer">
-                <div id="stamina">Stamina: <span id="stamina-value">10</span></div>
-                <div id="timer">Time: <span id="timer-value">00:00</span></div>
-            </div>
+    </div>
+    <div id="level-selection" class="hidden">
+        <h2>Select Level</h2>
+        <button class="level-button" data-level="easy">Easy</button>
+        <button class="level-button" data-level="normal">Normal</button>
+        <button class="level-button" data-level="hard">Hard</button>
+    </div>
+    <div id="game-container" class="hidden">
+        <div id="game-header">
+            <span id="stamina">Stamina: <span id="stamina-value">10</span></span>
+            <span id="timer">Time Left: <span id="time-left">0</span></span>
         </div>
-    </main>
+        <div id="game-board"></div>
+    </div>
+    <button id="start-button">Start Game</button>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,102 +1,93 @@
-// script.js
-document.addEventListener('DOMContentLoaded', async () => {
-    const userId = new URLSearchParams(window.location.search).get('userId');
-    const response = await fetch(`http://localhost:3000/user/${userId}`);
-    const userData = await response.json();
+document.addEventListener('DOMContentLoaded', () => {
+    const cardImages = {
+        easy: [
+            'images/easy/card1.png',
+            'images/easy/card2.png',
+            'images/easy/card3.png'
+        ],
+        normal: [
+            'images/normal/card1.png',
+            'images/normal/card2.png',
+            'images/normal/card3.png',
+            'images/normal/card4.png'
+        ],
+        hard: [
+            'images/hard/card1.png',
+            'images/hard/card2.png',
+            'images/hard/card3.png',
+            'images/hard/card4.png',
+            'images/hard/card5.png',
+            'images/hard/card6.png'
+        ]
+    };
+
+    const board = document.getElementById('game-board');
+    const startButton = document.getElementById('start-button');
+    const levelSelection = document.getElementById('level-selection');
+    const gameContainer = document.getElementById('game-container');
+    const levelButtons = document.querySelectorAll('.level-button');
     const staminaDisplay = document.getElementById('stamina-value');
     const pointsDisplay = document.getElementById('points');
-    const timerDisplay = document.getElementById('timer-value');
-    let stamina = userData.stamina;
-    let points = userData.points;
+    const timeLeftDisplay = document.getElementById('time-left');
+
+    let cardElements = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let selectedLevel = '';
+    let stamina = 10;
+    let points = 0;
     let timer;
-    let levelImages = [];
+    let userId = new URLSearchParams(window.location.search).get('userId');
 
-    document.getElementById('username').textContent = `User ${userId}`;
-    pointsDisplay.textContent = points;
-    staminaDisplay.textContent = stamina;
+    // Update user info from URL
+    document.getElementById('username-value').textContent = userId;
 
-    document.querySelectorAll('.level-button').forEach(button => {
+    // Show level selection when start button is clicked
+    startButton.addEventListener('click', () => {
+        startButton.classList.add('hidden');
+        levelSelection.classList.remove('hidden');
+    });
+
+    // Handle level selection
+    levelButtons.forEach(button => {
         button.addEventListener('click', () => {
-            startGame(button.dataset.level);
+            selectedLevel = button.dataset.level;
+            levelSelection.classList.add('hidden');
+            gameContainer.classList.remove('hidden');
+            createBoard();
+            startTimer();
         });
     });
 
-    function updateStamina() {
-        stamina++;
-        staminaDisplay.textContent = stamina;
-        fetch(`http://localhost:3000/user/${userId}/update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stamina })
-        });
-    }
-
-    function startGame(level) {
-        document.getElementById('level-selection').classList.add('hidden');
-        document.getElementById('game-container').classList.remove('hidden');
-        createBoard(level);
-        startTimer();
-    }
-
-    function startTimer() {
-        let seconds = 0;
-        timer = setInterval(() => {
-            seconds++;
-            const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const secs = (seconds % 60).toString().padStart(2, '0');
-            timerDisplay.textContent = `${minutes}:${secs}`;
-            if (seconds % 120 === 0) {
-                updateStamina();
-            }
-        }, 1000);
-    }
-
-    function createBoard(level) {
-        const board = document.getElementById('game-board');
+    // Function to create the game board
+    function createBoard() {
         board.innerHTML = '';
         let gridTemplateColumns;
         let gridTemplateRows;
-        let images = [];
+        const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
 
-        switch (level) {
+        switch (selectedLevel) {
             case 'easy':
-                images = [
-                    'images/easy/card1.png',
-                    'images/easy/card2.png',
-                    'images/easy/card3.png'
-                ];
-                gridTemplateColumns = 'repeat(3, 100px)';
-                gridTemplateRows = 'repeat(2, 100px)';
+                gridTemplateColumns = 'repeat(3, 100px)'; // 3 columns
+                gridTemplateRows = 'repeat(2, 100px)';    // 2 rows
                 break;
             case 'normal':
-                images = [
-                    'images/normal/card1.png',
-                    'images/normal/card2.png',
-                    'images/normal/card3.png',
-                    'images/normal/card4.png'
-                ];
-                gridTemplateColumns = 'repeat(4, 100px)';
-                gridTemplateRows = 'repeat(2, 100px)';
+                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
+                gridTemplateRows = 'repeat(2, 100px)';    // 2 rows
                 break;
             case 'hard':
-                images = [
-                    'images/hard/card1.png',
-                    'images/hard/card2.png',
-                    'images/hard/card3.png',
-                    'images/hard/card4.png',
-                    'images/hard/card5.png',
-                    'images/hard/card6.png'
-                ];
-                gridTemplateColumns = 'repeat(4, 100px)';
-                gridTemplateRows = 'repeat(3, 100px)';
+                gridTemplateColumns = 'repeat(4, 100px)'; // 4 columns
+                gridTemplateRows = 'repeat(3, 100px)';    // 3 rows
                 break;
+            default:
+                gridTemplateColumns = 'repeat(3, 100px)'; // Default fallback
+                gridTemplateRows = 'repeat(3, 100px)';
         }
 
-        const cards = [...images, ...images].sort(() => 0.5 - Math.random());
         board.style.gridTemplateColumns = gridTemplateColumns;
         board.style.gridTemplateRows = gridTemplateRows;
 
-        cards.forEach(image => {
+        cards.forEach((image) => {
             const card = document.createElement('div');
             card.classList.add('card');
             card.dataset.image = image;
@@ -107,62 +98,78 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             card.addEventListener('click', () => flipCard(card));
             board.appendChild(card);
+            cardElements.push(card);
         });
     }
 
+    // Function to flip a card
     function flipCard(card) {
-        if (card.classList.contains('flipped') || document.querySelectorAll('.flipped').length === 2) return;
-        card.classList.add('flipped');
+        if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
 
-        const flippedCards = document.querySelectorAll('.flipped');
+        card.classList.add('flipped');
+        flippedCards.push(card);
+
         if (flippedCards.length === 2) {
-            setTimeout(() => {
-                checkForMatch(flippedCards);
-            }, 1000);
+            setTimeout(checkForMatch, 1000);
         }
     }
 
-    function checkForMatch(cards) {
-        const [card1, card2] = cards;
-        if (card1.dataset.image
-            if (card1.dataset.image === card2.dataset.image) {
-                // Match found
-                points += 100; // Example points increase, adjust based on level
-                fetch(`http://localhost:3000/user/${userId}/update`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ points })
-                });
-                document.getElementById('points').textContent = points;
-                card1.classList.add('matched');
-                card2.classList.add('matched');
-                if (document.querySelectorAll('.card:not(.matched)').length === 0) {
-                    clearInterval(timer);
-                    alert('Congratulations! You have matched all pairs.');
-                    document.getElementById('level-selection').classList.remove('hidden');
-                    document.getElementById('game-container').classList.add('hidden');
-                }
-            } else {
-                card1.classList.remove('flipped');
-                card2.classList.remove('flipped');
-            }
-        }
-    
-        function updateStamina() {
-            stamina--;
-            if (stamina <= 0) {
+    // Function to check if two flipped cards match
+    function checkForMatch() {
+        const [card1, card2] = flippedCards;
+        const image1 = card1.dataset.image;
+        const image2 = card2.dataset.image;
+
+        if (image1 === image2) {
+            matchedPairs++;
+            points += selectedLevel === 'easy' ? 100 : selectedLevel === 'normal' ? 300 : 500;
+            fetch(`http://localhost:3000/user/${userId}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points })
+            });
+            pointsDisplay.textContent = `Points: ${points}`;
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            if (document.querySelectorAll('.card:not(.matched)').length === 0) {
                 clearInterval(timer);
-                alert('Game Over! Your stamina has run out.');
+                alert('Congratulations! You have matched all pairs.');
                 document.getElementById('level-selection').classList.remove('hidden');
-                document.getElementById('game-container').classList.add('hidden');
-            } else {
-                fetch(`http://localhost:3000/user/${userId}/update`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stamina })
-                });
-                document.getElementById('stamina-value').textContent = stamina;
+                gameContainer.classList.add('hidden');
             }
+        } else {
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
         }
-    });
-    
+
+        flippedCards = [];
+    }
+
+    // Function to start the timer
+    function startTimer() {
+        let timeLeft = 0;
+        timer = setInterval(() => {
+            timeLeft++;
+            timeLeftDisplay.textContent = timeLeft;
+            updateStamina();
+        }, 1000);
+    }
+
+    // Function to update stamina
+    function updateStamina() {
+        stamina--;
+        if (stamina <= 0) {
+            clearInterval(timer);
+            alert('Game Over! Your stamina has run out.');
+            document.getElementById('level-selection').classList.remove('hidden');
+            gameContainer.classList.add('hidden');
+        } else {
+            fetch(`http://localhost:3000/user/${userId}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stamina })
+            });
+            staminaDisplay.textContent = stamina;
+        }
+    }
+});
