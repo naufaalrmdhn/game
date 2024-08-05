@@ -4,47 +4,43 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
-    background-color: #f4f4f4;
+    background-color: #f0f0f0;
 }
 
-#game-container {
+#app {
     text-align: center;
 }
 
-button {
-    margin: 5px;
+#level-selection button {
+    margin: 10px;
     padding: 10px 20px;
     font-size: 16px;
-    cursor: pointer;
 }
 
-.game-row {
-    display: flex;
+#game-board {
+    display: none;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    gap: 10px;
     justify-content: center;
+    margin-top: 20px;
 }
 
-.game-cell {
-    width: 60px;
-    height: 60px;
-    margin: 5px;
+.card {
+    width: 100px;
+    height: 100px;
     background-color: #ccc;
-    cursor: pointer;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    cursor: pointer;
     font-size: 24px;
-    color: transparent;
-    border: 2px solid #ddd;
-    transition: background-color 0.3s, color 0.3s;
 }
 
-.game-cell.flipped {
-    background-color: #fff;
-    color: #000;
-}
-
-.game-cell.matched {
-    background-color: #a8d5e2;
-    color: #000;
+#stamina, #points {
+    margin-top: 20px;
+    font-size: 18px;
 }
