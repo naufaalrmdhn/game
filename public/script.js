@@ -25,10 +25,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const levelSelection = document.getElementById('level-selection');
     const levelButtons = document.querySelectorAll('.level-button');
+    const staminaDisplay = document.getElementById('stamina-value');
+    const pointsDisplay = document.getElementById('points-value');
+    const timerDisplay = document.getElementById('timer-value');
+    const usernameDisplay = document.getElementById('username-value');
+    
     let cardElements = [];
     let flippedCards = [];
     let matchedPairs = 0;
     let selectedLevel = '';
+    let userId = new URLSearchParams(window.location.search).get('userId');
+    let stamina = 10;
+    let points = 0;
+    let timer = 0;
+    let timerInterval;
+    
+    // Fetch user data
+    fetch(`http://localhost:3000/user/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            points = data.points || 0;
+            stamina = data.stamina || 10;
+            usernameDisplay.textContent = `User ${userId}`;
+            pointsDisplay.textContent = points;
+            staminaDisplay.textContent = stamina;
+            startTimer();
+        });
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timer++;
+            timerDisplay.textContent = timer;
+            if (timer % 120 === 0) { // Every 2 minutes
+                stamina++;
+                staminaDisplay.textContent = stamina;
+            }
+        }, 1000);
+    }
 
     // Show level selection when start button is clicked
     startButton.addEventListener('click', () => {
@@ -86,8 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (image1 === image2) {
             matchedPairs++;
+            points += getPointsForLevel(selectedLevel);
+            pointsDisplay.textContent = points;
+            updateUserData();
             if (matchedPairs === cardImages[selectedLevel].length) {
                 alert('Congratulations! You have matched all pairs.');
+                levelSelection.classList.remove('hidden');
+                board.classList.add('hidden');
+                resetGame();
             }
         } else {
             card1.classList.remove('flipped');
@@ -95,5 +134,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         flippedCards = [];
+    }
+
+    function getPointsForLevel(level) {
+        switch (level) {
+            case 'easy':
+                return 100;
+            case 'normal':
+                return 300;
+            case 'hard':
+                return 500;
+            default:
+                return 0;
+        }
+    }
+
+    function updateUserData() {
+        fetch(`http://localhost:3000/user/${userId}/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ points, stamina }),
+        });
+    }
+
+    function resetGame() {
+        cardElements = [];
+        flippedCards = [];
+        matchedPairs = 0;
+        stamina--; // Deduct stamina after game is over
+        staminaDisplay.textContent = stamina;
+        updateUserData();
     }
 });

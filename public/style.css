@@ -44,6 +44,10 @@ body {
     gap: 10px;
     justify-content: center;
     margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
 }
 
 /* CSS for cards */
@@ -73,6 +77,19 @@ body {
 .card:hover {
     background-color: #ccc;
     transform: scale(1.05);
+}
+
+/* Header and Footer */
+header, footer {
+    margin: 10px 0;
+}
+
+#user-info {
+    margin-bottom: 20px;
+}
+
+#stamina, #timer {
+    margin: 5px 0;
 }
 
 /* Responsive Design */
