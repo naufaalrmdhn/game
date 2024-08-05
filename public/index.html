@@ -8,16 +8,19 @@
 </head>
 <body>
     <div class="container">
-        <div id="username">Username: unknown</div>
-        <div id="points">Points: 0</div>
-        <div id="stamina">Stamina: 10</div>
+        <h1>Memory Game</h1>
+        <div id="user-info">
+            <p id="username">UserID: unknown</p>
+            <p id="points">Points: 0</p>
+            <p id="stamina">Stamina: 10</p>
+        </div>
         <button id="start-button">Start Game</button>
         <div id="level-selection" class="hidden">
             <button class="level-button" data-level="easy">Easy</button>
             <button class="level-button" data-level="normal">Normal</button>
             <button class="level-button" data-level="hard">Hard</button>
         </div>
-        <div id="game-board" class="hidden board"></div>
+        <div id="game-board" class="hidden"></div>
     </div>
     <script src="script.js"></script>
 </body>

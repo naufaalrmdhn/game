@@ -1,101 +1,51 @@
-/* Basic styles */
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     margin: 0;
-    padding: 0;
     background-color: #f0f0f0;
 }
 
-#game-container {
-    margin: 20px auto;
-    width: fit-content;
+.container {
+    text-align: center;
+}
+
+#user-info {
+    margin-bottom: 20px;
+}
+
+#game-board {
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+}
+
+.card {
+    width: 80px;
+    height: 80px;
+    position: relative;
+}
+
+.cover {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+.card.flipped img {
+    display: block;
 }
 
 .hidden {
     display: none;
-}
-
-/* CSS for level selection */
-#level-selection {
-    margin: 20px auto;
-}
-
-.level-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: #3498db;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 10px;
-    transition: background-color 0.3s;
-}
-
-.level-button:hover {
-    background-color: #2980b9;
-}
-
-/* CSS for game board */
-.board {
-    display: grid;
-    gap: 10px;
-    justify-content: center;
-    margin: 20px auto;
-}
-
-/* CSS for cards */
-.card {
-    width: 80px;
-    height: 80px;
-    background: #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.3s, transform 0.3s;
-}
-
-.card img {
-    width: 80px;
-    height: 80px;
-    display: none; /* Hide images initially */
-}
-
-.card.flipped img {
-    display: block; /* Show image when card is flipped */
-}
-
-.card .cover {
-    width: 80px;
-    height: 80px;
-    background: #bbb; /* Cover color */
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-.card:hover {
-    background-color: #ccc;
-    transform: scale(1.05);
-}
-
-#game-board.hidden {
-    display: none;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-    .card {
-        width: 60px;
-        height: 60px;
-    }
-
-    .card img {
-        width: 60px;
-        height: 60px;
-    }
 }

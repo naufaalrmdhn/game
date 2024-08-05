@@ -32,7 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let flippedCards = [];
     let matchedPairs = 0;
     let selectedLevel = '';
-    let userId = localStorage.getItem('userId') || 'unknown';
+    let userId = new URLSearchParams(window.location.search).get('userId');
+    if (!userId) {
+        userId = localStorage.getItem('userId') || 'unknown';
+    } else {
+        localStorage.setItem('userId', userId);
+    }
     let points = 0;
     let stamina = 10;
     let levelPoints = { easy: 100, normal: 300, hard: 500 };
@@ -58,6 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         stamina = data.stamina || 10;
         staminaElement.textContent = `Stamina: ${stamina}`;
+    }
+
+    // Fetch and display points
+    async function fetchPoints() {
+        const response = await fetch('/get-points', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        });
+        const data = await response.json();
+        points = data.points || 0;
+        pointsElement.textContent = `Points: ${points}`;
     }
 
     // Update stamina in the backend
@@ -87,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         fetchUsername();
         fetchStamina();
+        fetchPoints();
         setInterval(updateStamina, 60000); // Update stamina every 1 minute
     }
 
