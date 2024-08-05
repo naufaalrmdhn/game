@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const levelSelection = document.getElementById('level-selection');
     const levelButtons = document.querySelectorAll('.level-button');
-    const usernameElement = document.getElementById('username');
     const pointsElement = document.getElementById('points');
     const staminaElement = document.getElementById('stamina');
     let cardElements = [];
@@ -37,15 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let stamina = 10;
     let levelPoints = { easy: 100, normal: 300, hard: 500 };
 
-    // Fetch username and update UI
-    async function fetchUsername() {
-        const response = await fetch('/get-username', {
+    // Fetch and display points
+    async function fetchPoints() {
+        const response = await fetch('/get-points', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: userId })
         });
         const data = await response.json();
-        usernameElement.textContent = `Username: ${data.username || 'unknown'}`;
+        points = data.points || 0;
+        updateUI();
     }
 
     // Fetch and display stamina
@@ -80,14 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: userId, points: points })
         });
-        pointsElement.textContent = `Points: ${points}`; // Update points UI
     }
 
     // Initialize the UI and fetch data
     function initialize() {
-        fetchUsername();
-        fetchStamina();
         fetchPoints();
+        fetchStamina();
         setInterval(updateStamina, 60000); // Update stamina every 1 minute
     }
 
@@ -172,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             matchedPairs++;
             if (matchedPairs === cardImages[selectedLevel].length) {
                 points += levelPoints[selectedLevel];
-                updatePoints(); // Update points in backend and UI
+                updatePoints(); // Update points in backend
                 alert('Congratulations! You have matched all pairs.');
                 resetGame();
             }
@@ -192,10 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cardElements.forEach(card => card.classList.remove('flipped'));
         cardElements.forEach(card => card.querySelector('.cover').style.display = 'block'); // Show covers
         cardElements = [];
+        board.innerHTML = '';
         board.classList.add('hidden');
         startButton.classList.remove('hidden');
     }
 
-    // Initialize the application
-    initialize();
+    initialize(); // Initialize everything when DOM is loaded
 });
