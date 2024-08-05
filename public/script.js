@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let flippedCards = [];
             function flipCard(card) {
-                if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+                if (flippedCards.length < 2 && !card.classList.contains('flipped') && !card.classList.contains('matched')) {
                     card.classList.remove('cover');
                     card.classList.add('flipped');
                     flippedCards.push(card);
@@ -104,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                     },
                                     body: JSON.stringify({ userId, level, won: true })
                                 });
-                                // Reset game atau lanjut
                             } else {
                                 // Not matched
                                 firstCard.classList.add('cover');

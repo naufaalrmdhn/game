@@ -74,10 +74,19 @@ footer {
     display: none;
 }
 
-.card.cover::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
+.card.cover {
     background-color: #888;
+}
+
+.card.cover img {
+    display: none;
+}
+
+.card.flipped img {
+    display: block;
+}
+
+.card.matched {
+    background-color: #4caf50;
+    cursor: default;
 }
