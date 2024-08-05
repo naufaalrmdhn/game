@@ -1,3 +1,42 @@
+/* Basic styles */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+#game-container {
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.hidden {
+    display: none;
+}
+
+/* CSS for level selection */
+#level-selection {
+    margin: 20px auto;
+}
+
+.level-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s;
+}
+
+.level-button:hover {
+    background-color: #2980b9;
+}
+
 /* CSS for game board */
 .board {
     display: grid;
@@ -6,31 +45,15 @@
     margin: 20px auto;
 }
 
-/* CSS for board sizes based on level */
-.board.easy {
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(2, 100px);
-}
-
-.board.normal {
-    grid-template-columns: repeat(4, 100px);
-    grid-template-rows: repeat(2, 100px);
-}
-
-.board.hard {
-    grid-template-columns: repeat(4, 100px);
-    grid-template-rows: repeat(3, 100px);
-}
-
-/* Other CSS styles */
+/* CSS for cards */
 .card {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     background: #ddd;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    position: relative;
     cursor: pointer;
     border-radius: 8px;
     transition: background-color 0.3s, transform 0.3s;
@@ -46,7 +69,33 @@
     display: block; /* Show image when card is flipped */
 }
 
+.card .cover {
+    width: 80px;
+    height: 80px;
+    background: #bbb; /* Cover color */
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .card:hover {
     background-color: #ccc;
     transform: scale(1.05);
+}
+
+#game-board.hidden {
+    display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .card {
+        width: 60px;
+        height: 60px;
+    }
+
+    .card img {
+        width: 60px;
+        height: 60px;
+    }
 }

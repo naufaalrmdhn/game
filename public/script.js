@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userId = localStorage.getItem('userId') || 'unknown';
     let points = 0;
     let stamina = 10;
+    let levelPoints = { easy: 100, normal: 300, hard: 500 };
 
     // Fetch username and update UI
     async function fetchUsername() {
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         usernameElement.textContent = `Username: ${data.username || 'unknown'}`;
     }
 
+    // Fetch and display stamina
     async function fetchStamina() {
         const response = await fetch('/get-stamina', {
             method: 'POST',
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         staminaElement.textContent = `Stamina: ${stamina}`;
     }
 
+    // Update stamina in the backend
     async function updateStamina() {
         if (stamina < 10) {
             stamina++;
@@ -70,30 +73,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Update points in the backend
+    async function updatePoints() {
+        await fetch('/update-points', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, points: points })
+        });
+        pointsElement.textContent = `Points: ${points}`; // Update points UI
+    }
+
+    // Initialize the UI and fetch data
+    function initialize() {
+        fetchUsername();
+        fetchStamina();
+        setInterval(updateStamina, 60000); // Update stamina every 1 minute
+    }
+
     function updateUI() {
         pointsElement.textContent = `Points: ${points}`;
         staminaElement.textContent = `Stamina: ${stamina}`;
     }
 
-    function startStaminaTimer() {
-        setInterval(updateStamina, 60000); // Update stamina every 1 minute
-    }
-
+    // Show level selection when start button is clicked
     startButton.addEventListener('click', () => {
         startButton.classList.add('hidden');
         levelSelection.classList.remove('hidden');
     });
 
+    // Handle level selection
     levelButtons.forEach(button => {
         button.addEventListener('click', () => {
             selectedLevel = button.dataset.level;
             levelSelection.classList.add('hidden');
             board.classList.remove('hidden');
-            board.className = `board ${selectedLevel}`; // Update class for grid layout
             createBoard();
         });
     });
 
+    // Function to create the game board
     function createBoard() {
         board.innerHTML = '';
         const cards = [...cardImages[selectedLevel], ...cardImages[selectedLevel]].sort(() => 0.5 - Math.random());
@@ -103,6 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
             card.classList.add('card');
             card.dataset.image = image;
 
+            const cover = document.createElement('div');
+            cover.classList.add('cover');
+            card.appendChild(cover);
+
             const img = document.createElement('img');
             img.src = image;
             card.appendChild(img);
@@ -111,12 +133,27 @@ document.addEventListener('DOMContentLoaded', () => {
             board.appendChild(card);
             cardElements.push(card);
         });
+
+        // Adjust grid layout based on selected level
+        switch (selectedLevel) {
+            case 'easy':
+                board.style.gridTemplateColumns = 'repeat(3, 80px)';
+                break;
+            case 'normal':
+                board.style.gridTemplateColumns = 'repeat(4, 80px)';
+                break;
+            case 'hard':
+                board.style.gridTemplateColumns = 'repeat(6, 80px)';
+                break;
+        }
     }
 
+    // Function to flip a card
     function flipCard(card) {
         if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
 
         card.classList.add('flipped');
+        card.querySelector('.cover').style.display = 'none'; // Hide cover when flipped
         flippedCards.push(card);
 
         if (flippedCards.length === 2) {
@@ -124,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to check if two flipped cards match
     function checkForMatch() {
         const [card1, card2] = flippedCards;
         const image1 = card1.dataset.image;
@@ -131,35 +169,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (image1 === image2) {
             matchedPairs++;
+            points += levelPoints[selectedLevel];
+            updatePoints(); // Update points in backend and UI
             if (matchedPairs === cardImages[selectedLevel].length) {
-                points += getPointsForLevel(selectedLevel); // Add points only when all pairs are matched
-                await fetch('/update-points', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: userId, points: points })
-                });
                 alert('Congratulations! You have matched all pairs.');
+                resetGame();
             }
         } else {
             card1.classList.remove('flipped');
             card2.classList.remove('flipped');
+            card1.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
+            card2.querySelector('.cover').style.display = 'block'; // Show cover for unmatched cards
         }
 
         flippedCards = [];
     }
 
-    function getPointsForLevel(level) {
-        switch (level) {
-            case 'easy': return 100;
-            case 'normal': return 300;
-            case 'hard': return 500;
-            default: return 0;
-        }
+    // Function to reset the game
+    function resetGame() {
+        matchedPairs = 0;
+        cardElements.forEach(card => card.classList.remove('flipped'));
+        cardElements.forEach(card => card.querySelector('.cover').style.display = 'block'); // Show covers
+        cardElements = [];
+        board.innerHTML = '';
+        board.classList.add('hidden');
+        startButton.classList.remove('hidden');
     }
 
-    // Initialize UI and fetch user data
-    fetchUsername();
-    fetchStamina();
-    updateUI();
-    startStaminaTimer(); // Start the stamina timer on page load
+    initialize(); // Initialize everything when DOM is loaded
 });
